@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block title %}Employee Login{% endblock %}
+
+{% block content %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0d6efd, #6610f2);
+        min-height: 100vh;
+    }
+    .login-card {
+        border-radius: 18px;
+        overflow: hidden;
+        animation: fadeIn 0.6s ease-in-out;
+    }
+    .login-header {
+        background: linear-gradient(135deg, #0d6efd, #4c1d95);
+    }
+    .form-control:focus,
+    .form-select:focus {
+        box-shadow: none;
+        border-color: #0d6efd;
+    }
+    .btn-login {
+        background: linear-gradient(135deg, #0d6efd, #6610f2);
+        border: none;
+        transition: 0.3s;
+    }
+    .btn-login:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(13,110,253,0.3);
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="container d-flex justify-content-center align-items-center vh-100">
+    <div class="col-md-5 col-lg-4">
+
+        <div class="card login-card shadow-lg border-0">
+            <div class="card-header login-header text-white text-center py-4">
+                <h3 class="fw-bold mb-1">Employee Portal</h3>
+                <small class="opacity-75">Secure Login Access</small>
+            </div>
+
+            <div class="card-body p-4">
+
+                {% for message in messages %}
+                <div class="alert alert-danger text-center">
+                    {{ message }}
+                </div>
+                {% endfor %}
+
+                <form method="post">
+                    {% csrf_token %}
+
+                    <div class="form-floating mb-3">
+                        <input type="text" name="employee_id" class="form-control"
+                               id="employeeId" placeholder="Employee ID" required>
+                        <label for="employeeId">Employee ID</label>
+                    </div>
+
+                    <div class="form-floating mb-3">
+                        <select name="department" class="form-select" id="department" required>
+                            <option value="">Select Department</option>
+                            {% for dept in departments %}
+                            <option value="{{ dept.name }}">{{ dept.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <label for="department">Department</label>
+                    </div>
+
+                    <div class="form-floating mb-4">
+                        <input type="password" name="password" class="form-control"
+                               id="password" placeholder="Password" required>
+                        <label for="password">Password</label>
+                    </div>
+
+                    <button type="submit" class="btn btn-login text-white w-100 py-2 fw-semibold">
+                        Sign In
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

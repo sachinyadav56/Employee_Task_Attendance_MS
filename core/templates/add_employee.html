@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Add Employee{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <div class="card shadow">
+            <div class="card-header bg-success text-white">
+                Add Employee
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+
+                    <h6>User Details</h6>
+                    {{ user_form.as_p }}
+
+                    <hr>
+
+                    <h6>Employee Details</h6>
+                    {{ emp_form.as_p }}
+
+                    <button class="btn btn-success w-100 mt-3">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

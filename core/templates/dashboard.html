@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h3 class="mb-3">Welcome, {{ employee.user.first_name }}</h3>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card shadow text-center">
+            <div class="card-body">
+                <h6>Department</h6>
+                <h5>{{ employee.department }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow text-center">
+            <div class="card-body">
+                <h6>Employee ID</h6>
+                <h5>{{ employee.employee_id }}</h5>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow text-center">
+            <div class="card-body">
+                <h6>Today's Status</h6>
+                <h5>{{ attendance.status }}</h5>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow">
+    <div class="card-header bg-secondary text-white">
+        Assigned Tasks
+    </div>
+    <div class="card-body">
+        {% if tasks %}
+        <ul class="list-group">
+            {% for task in tasks %}
+            <li class="list-group-item d-flex justify-content-between">
+                {{ task.title }}
+                <span class="badge bg-{{ task.is_completed|yesno:'success,warning' }}">
+                    {{ task.is_completed|yesno:'Completed,Pending' }}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p>No tasks assigned.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
