@@ -15,7 +15,7 @@ class UserForm(forms.ModelForm):
 class EmployeeForm(forms.ModelForm):
     class Meta:
         model = Employee
-        fields = ['employee_id', 'department', 'role', 'phone']
+        fields = ['employee_id', 'department', 'role', 'phone', 'is_active']
 
 
 class TaskForm(forms.ModelForm):

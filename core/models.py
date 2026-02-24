@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User
 from datetime import timedelta
+from django.contrib.auth.hashers import make_password, check_password
 
 
 class Department(models.Model):
@@ -8,6 +8,7 @@ class Department(models.Model):
 
     def __str__(self):
         return self.name
+
 
 class Employee(models.Model):
 
@@ -17,29 +18,36 @@ class Employee(models.Model):
         ('EMPLOYEE', 'Employee'),
     )
 
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
     employee_id = models.CharField(max_length=20, unique=True)
-    department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
+    department = models.ForeignKey(
+        Department,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
     role = models.CharField(max_length=20, choices=ROLE_CHOICES)
-    phone = models.CharField(max_length=20)
+    phone = models.CharField(max_length=20)  # also acts as password
+    password = models.CharField(max_length=255)  # hashed password
     is_active = models.BooleanField(default=True)
 
+    # 🔐 set password using phone number
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+
+    # 🔐 check password
+    def check_password(self, raw_password):
+        return check_password(raw_password, self.password)
+
     def __str__(self):
-        return f"{self.employee_id} - {self.user.username} ({self.role})"
-
-# class Employee(models.Model):
-#     user = models.OneToOneField(User, on_delete=models.CASCADE)
-#     employee_id = models.CharField(max_length=20, unique=True)
-#     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
-#     phone = models.CharField(max_length=20)
-#     is_active = models.BooleanField(default=True)
-
-#     def __str__(self):
-#         return f"{self.employee_id} - {self.user.username}"
+        return self.employee_id
 
 
 class Task(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='tasks')
+    employee = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name='tasks'
+    )
     title = models.CharField(max_length=200)
     description = models.TextField()
     is_completed = models.BooleanField(default=False)
@@ -50,7 +58,11 @@ class Task(models.Model):
 
 
 class Attendance(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name='attendance')
+    employee = models.ForeignKey(
+        Employee,
+        on_delete=models.CASCADE,
+        related_name='attendance'
+    )
     date = models.DateField(auto_now_add=True)
     login_time = models.TimeField(null=True, blank=True)
     logout_time = models.TimeField(null=True, blank=True)
@@ -60,9 +72,14 @@ class Attendance(models.Model):
 
     STATUS_CHOICES = [
         ('Present', 'Present'),
-        ('Absent', 'Absent')
+        ('Absent', 'Absent'),
     ]
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Absent')
+
+    status = models.CharField(
+        max_length=10,
+        choices=STATUS_CHOICES,
+        default='Absent'
+    )
 
     class Meta:
         unique_together = ('employee', 'date')
