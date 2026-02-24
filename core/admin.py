@@ -11,8 +11,8 @@ class DepartmentAdmin(admin.ModelAdmin):
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('employee_id', 'get_username', 'department', 'phone', 'is_active')
-    list_filter = ('department', 'is_active')
+    list_display = ('employee_id', 'get_username', 'department', 'role', 'phone', 'is_active')
+    list_filter = ('department', 'role', 'is_active')
     search_fields = ('employee_id', 'user__username')
     ordering = ('employee_id',)
 

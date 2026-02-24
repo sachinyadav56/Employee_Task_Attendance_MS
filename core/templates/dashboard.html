@@ -2,56 +2,157 @@
 {% block title %}Dashboard{% endblock %}
 
 {% block content %}
-<h3 class="mb-3">Welcome, {{ employee.user.first_name }}</h3>
 
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="card shadow text-center">
-            <div class="card-body">
-                <h6>Department</h6>
-                <h5>{{ employee.department }}</h5>
+<style>
+    /* Page background */
+    body {
+        background: #f5f7fb; /* soft neutral */
+        min-height: 100vh;
+        font-size: 14px; /* global font reduced */
+        color: #334155;
+    }
+
+    /* Welcome text */
+    .welcome-text {
+        font-weight: 600;
+        font-size: 1.25rem;
+        color: #1e293b;
+    }
+
+    /* Info cards */
+    .info-card {
+        border: none;
+        border-radius: 14px;
+        color: #ffffff;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .info-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+    }
+
+    /* Muted professional gradients */
+    .bg-department {
+        background: linear-gradient(135deg, #475569, #334155); /* slate */
+    }
+
+    .bg-empid {
+        background: linear-gradient(135deg, #0f766e, #115e59); /* teal */
+    }
+
+    .bg-status {
+        background: linear-gradient(135deg, #15803d, #166534); /* green */
+    }
+
+    /* Card text sizing */
+    .info-card h6 {
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        margin-bottom: 6px;
+        opacity: 0.85;
+    }
+
+    .info-card h4 {
+        font-size: 1.05rem;
+        margin-bottom: 0;
+    }
+
+    /* Task card */
+    .task-card {
+        border-radius: 14px;
+        border: none;
+    }
+
+    .card-header h5 {
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    /* Task list */
+    .task-item {
+        border-radius: 10px;
+        margin-bottom: 8px;
+        font-size: 0.9rem;
+        transition: background 0.2s ease;
+    }
+
+    .task-item:hover {
+        background: #f1f5f9;
+    }
+
+    /* Badge */
+    .badge {
+        font-size: 0.7rem;
+        padding: 5px 10px;
+        font-weight: 500;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+        .welcome-text {
+            text-align: center;
+            font-size: 1.1rem;
+        }
+    }
+</style>
+
+<h3 class="mb-4 welcome-text">
+    👋 Welcome, {{ employee.user.first_name }}
+</h3>
+
+<!-- INFO CARDS -->
+<div class="row g-4 mb-4">
+    <div class="col-lg-4 col-md-6">
+        <div class="card info-card bg-department text-center shadow">
+            <div class="card-body py-4">
+                <h6 class="opacity-75">Department</h6>
+                <h4 class="fw-bold">{{ employee.department }}</h4>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow text-center">
-            <div class="card-body">
-                <h6>Employee ID</h6>
-                <h5>{{ employee.employee_id }}</h5>
+    <div class="col-lg-4 col-md-6">
+        <div class="card info-card bg-empid text-center shadow">
+            <div class="card-body py-4">
+                <h6 class="opacity-75">Employee ID</h6>
+                <h4 class="fw-bold">{{ employee.employee_id }}</h4>
             </div>
         </div>
     </div>
 
-    <div class="col-md-4">
-        <div class="card shadow text-center">
-            <div class="card-body">
-                <h6>Today's Status</h6>
-                <h5>{{ attendance.status }}</h5>
+    <div class="col-lg-4 col-md-12">
+        <div class="card info-card bg-status text-center shadow">
+            <div class="card-body py-4">
+                <h6 class="opacity-75">Today's Status</h6>
+                <h4 class="fw-bold">{{ attendance.status }}</h4>
             </div>
         </div>
     </div>
 </div>
 
-<div class="card shadow">
-    <div class="card-header bg-secondary text-white">
-        Assigned Tasks
+<!-- TASKS -->
+<div class="card shadow task-card">
+    <div class="card-header bg-dark text-white rounded-top-4">
+        <h5 class="mb-0">📋 Assigned Tasks</h5>
     </div>
+
     <div class="card-body">
         {% if tasks %}
-        <ul class="list-group">
+        <ul class="list-group list-group-flush">
             {% for task in tasks %}
-            <li class="list-group-item d-flex justify-content-between">
-                {{ task.title }}
-                <span class="badge bg-{{ task.is_completed|yesno:'success,warning' }}">
+            <li class="list-group-item d-flex justify-content-between align-items-center task-item">
+                <span>{{ task.title }}</span>
+                <span class="badge rounded-pill bg-{{ task.is_completed|yesno:'success,warning' }}">
                     {{ task.is_completed|yesno:'Completed,Pending' }}
                 </span>
             </li>
             {% endfor %}
         </ul>
         {% else %}
-        <p>No tasks assigned.</p>
+        <p class="text-muted text-center mb-0">No tasks assigned.</p>
         {% endif %}
     </div>
 </div>
+
 {% endblock %}
