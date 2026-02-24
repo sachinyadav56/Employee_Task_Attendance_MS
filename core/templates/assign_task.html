@@ -2,113 +2,87 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Assign Task</title>
-
-    <!-- Bootstrap -->
+    <title>My Assigned Tasks | ETAMS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
-        body {
-            background: linear-gradient(135deg, #e0e7ff, #f8fafc);
-            min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-family: "Segoe UI", sans-serif;
-        }
-
-        .task-card {
-            width: 100%;
-            max-width: 420px;
-            border-radius: 18px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-            overflow: hidden;
-            background: rgba(255,255,255,0.95);
-        }
-
-        .task-header {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            color: #fff;
-            padding: 20px;
-            text-align: center;
-        }
-
-        .task-header h4 {
-            font-weight: 700;
-            margin-bottom: 5px;
-        }
-
-        .task-header small {
-            opacity: 0.85;
-        }
-
-        .task-body {
-            padding: 25px;
-        }
-
-        .task-body p {
-            margin-bottom: 15px;
-        }
-
-        label {
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-bottom: 5px;
-        }
-
-        .form-control,
-        .form-select {
-            border-radius: 10px;
-            padding: 10px;
-        }
-
-        .form-control:focus,
-        .form-select:focus {
-            box-shadow: none;
-            border-color: #0ea5e9;
-        }
-
-        .btn-assign {
-            background: linear-gradient(135deg, #0ea5e9, #0284c7);
-            color: #fff;
-            font-weight: 600;
-            border-radius: 12px;
-            padding: 10px;
-            border: none;
-            transition: 0.3s;
-        }
-
-        .btn-assign:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 20px rgba(14,165,233,0.35);
-        }
-
-        @media (max-width: 576px) {
-            .task-card {
-                margin: 15px;
-            }
-        }
+        body { background: #f4f7fb; min-height: 100vh; padding-top: 20px; font-family: 'Segoe UI', sans-serif; }
+        .task-done { text-decoration: line-through; color: #6c757d; }
+        .card { border-radius: 16px; border: none; }
+        .card-header { background: #fff; border-bottom: 1px solid #edf2f7; padding: 1.25rem; }
+        .btn-complete { font-size: 0.75rem; font-weight: 600; border-radius: 8px; }
     </style>
 </head>
-
 <body>
 
-<div class="task-card">
-    <div class="task-header">
-        <h4>📝 Assign Task</h4>
-        <small>Allocate task to employee</small>
-    </div>
-    
-    <div class="task-body">
-        <form method="post">
-            {% csrf_token %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-9">
+            
+            <div class="mb-3 d-flex justify-content-between align-items-center">
+                <a href="{% url 'employee_dashboard' %}" class="btn btn-outline-primary btn-sm">
+                    <i class="bi bi-arrow-left"></i> Dashboard
+                </a>
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-success py-1 px-3 mb-0 small">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            </div>
 
-            {{ form.as_p }}
+            <div class="card shadow-sm">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">📝 My Assigned Tasks</h5>
+                    <span class="badge bg-primary">{{ tasks|length }} Tasks</span>
+                </div>
 
-            <button type="submit" class="btn btn-assign w-100 mt-3">
-                Assign Task
-            </button>
-        </form>
+                <div class="card-body p-0">
+                    {% if tasks %}
+                        <div class="list-group list-group-flush">
+                            {% for task in tasks %}
+                                <div class="list-group-item p-4">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div style="max-width: 75%;">
+                                            <h6 class="fw-bold mb-1 {% if task.is_completed %}task-done{% endif %}">
+                                                {{ task.title }}
+                                            </h6>
+                                            <p class="text-muted small mb-2">{{ task.description }}</p>
+                                            <small class="text-secondary d-block">
+                                                <i class="bi bi-calendar-check"></i> Assigned: {{ task.assigned_date }}
+                                            </small>
+                                        </div>
+                                        
+                                        <div class="text-end">
+                                            {% if task.is_completed %}
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle mb-2 d-inline-block">
+                                                    <i class="bi bi-check-all"></i> Completed
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-warning-subtle text-warning-emphasis border border-warning-subtle mb-2 d-inline-block">
+                                                    Pending
+                                                </span>
+                                                <a href="{% url 'update_task_status' task.id %}" 
+                                                   class="btn btn-sm btn-success d-block btn-complete"
+                                                   onclick="return confirm('Mark this task as finished?')">
+                                                    Done
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="text-center p-5">
+                            <i class="bi bi-clipboard-x text-muted" style="font-size: 3rem;"></i>
+                            <p class="mt-3 text-muted">No tasks assigned to you yet.</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
     </div>
 </div>
 

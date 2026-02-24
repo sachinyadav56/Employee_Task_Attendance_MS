@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime, timedelta, date
@@ -8,18 +8,15 @@ from .forms import EmployeeForm, TaskForm
 from .decorators import employee_login_required
 
 
-# =========================
 # EMPLOYEE LOGIN
-# =========================
 def employee_login(request):
     if request.method == 'POST':
         emp_id = request.POST.get('employee_id').strip()
         department = request.POST.get('department')
-        role = request.POST.get('role')  # Added Role capture
+        role = request.POST.get('role') 
         password = request.POST.get('password').strip()
 
         try:
-            # Match Employee ID, Department Name, and Role
             employee = Employee.objects.get(
                 employee_id=emp_id,
                 department__name=department,
@@ -36,7 +33,7 @@ def employee_login(request):
 
         request.session['employee_id'] = employee.id
 
-        # Attendance logic
+        # Create Attendance Record immediately upon login
         Attendance.objects.get_or_create(
             employee=employee,
             date=date.today(),
@@ -51,17 +48,55 @@ def employee_login(request):
     return render(request, 'login.html', {'departments': departments})
 
 
-# =========================
-# EMPLOYEE DASHBOARD  ✅ FIX ADDED
-# =========================
+
+# EMPLOYEE DASHBOARD ✅ FIXED
+
 @employee_login_required
 def employee_dashboard(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
-    tasks = Task.objects.filter(employee=employee)
+    
+    # FIX: Fetch today's attendance so it shows on the dashboard
+    attendance = Attendance.objects.filter(
+        employee=employee, 
+        date=date.today()
+    ).first()
+
+    # Fetch tasks for the dashboard list
+    tasks = Task.objects.filter(employee=employee).order_by('-assigned_date')
 
     return render(request, 'dashboard.html', {
         'employee': employee,
-        'tasks': tasks
+        'tasks': tasks,
+        'attendance': attendance  # Added this
+    })
+
+
+# UPDATE TASK STATUS ✅ NEW
+
+@employee_login_required
+def update_task_status(request, task_id):
+    # Security: Ensure task belongs to the logged-in employee
+    task = get_object_or_404(Task, id=task_id, employee__id=request.session['employee_id'])
+    
+    task.is_completed = True 
+    task.save()
+    
+    messages.success(request, f"Task '{task.title}' marked as completed!")
+    # Redirect to whichever page you want (dashboard or assign_task)
+    return redirect('employee_dashboard') 
+
+
+
+# ASSIGN TASK (VIEW ONLY)
+# =========================
+@employee_login_required
+def assign_task(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+    tasks = Task.objects.filter(employee=employee).order_by('-assigned_date')
+
+    return render(request, 'assign_task.html', {
+        'tasks': tasks,
+        'employee': employee
     })
 
 
@@ -79,7 +114,6 @@ def employee_logout(request):
 
     if attendance and not attendance.logout_time:
         now = timezone.localtime(timezone.now())
-
         attendance.logout_time = now.time()
 
         login_dt = datetime.combine(attendance.date, attendance.login_time)
@@ -95,15 +129,14 @@ def employee_logout(request):
         if net_hours < timedelta():
             net_hours = timedelta()
 
-        attendance.total_hours = total
-        attendance.break_time = break_time
-        attendance.net_working_hours = net_hours
+        attendance.total_hours = str(total).split('.')[0] # Format as string
+        attendance.break_time = str(break_time).split('.')[0]
+        attendance.net_working_hours = str(net_hours).split('.')[0]
         attendance.status = 'Present'
         attendance.save()
 
     request.session.flush()
     return redirect('employee_login')
-
 
 # =========================
 # ADD EMPLOYEE (ADMIN / MANAGER)
@@ -130,24 +163,6 @@ def add_employee(request):
 
     return render(request, 'add_employee.html', {'emp_form': form})
 
-
-# =========================
-# ASSIGN TASK
-# =========================
-@employee_login_required
-def assign_task(request):
-    if request.method == 'POST':
-        form = TaskForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, "Task assigned successfully")
-            return redirect('employee_dashboard')
-    else:
-        form = TaskForm()
-
-    return render(request, 'assign_task.html', {'form': form})
-
-
 # =========================
 # ATTENDANCE REPORT
 # =========================
@@ -157,3 +172,5 @@ def attendance_report(request):
     records = employee.attendance.all()
 
     return render(request, 'attendance_report.html', {'records': records})
+
+
