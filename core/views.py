@@ -135,6 +135,7 @@ def employee_dashboard(request):
             else:
                 late_display = f"{late_minutes} min"
 
+
     return render(request, 'dashboard.html', {
         'employee': employee,
         'attendance': attendance,
