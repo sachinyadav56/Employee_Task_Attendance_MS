@@ -135,7 +135,6 @@ def employee_dashboard(request):
             else:
                 late_display = f"{late_minutes} min"
 
-
     return render(request, 'dashboard.html', {
         'employee': employee,
         'attendance': attendance,
@@ -161,7 +160,6 @@ def update_task_status(request, task_id):
 
 
 # ASSIGN TASK (VIEW ONLY)
-# =========================
 @employee_login_required
 def assign_task(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
@@ -199,7 +197,7 @@ def employee_logout(request):
     now = timezone.localtime(timezone.now())
     logout_time = now.time()
 
-    # ---------------- COMPANY RULES ----------------
+    # COMPANY RULES 
     SHIFT_START = time(10, 0)
     SHIFT_END = time(17, 0)
 
@@ -210,7 +208,7 @@ def employee_logout(request):
     TOTAL_BREAK = BREAK_11_30 + LUNCH_BREAK + BREAK_4_30  # 1 hour
     REQUIRED_WORK = timedelta(hours=8)
 
-    # ------------------------------------------------
+    
 
     # Combine date & time
     dt_login = datetime.combine(date.today(), attendance.login_time)
@@ -228,7 +226,7 @@ def employee_logout(request):
     if net_work < timedelta():
         net_work = timedelta()
 
-    # ❌ BLOCK LOGOUT IF WORK < 8 HOURS
+    #  BLOCK LOGOUT IF WORK < 8 HOURS
     if net_work < REQUIRED_WORK:
         remaining = REQUIRED_WORK - net_work
         messages.error(
