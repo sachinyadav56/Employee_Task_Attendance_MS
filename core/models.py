@@ -63,15 +63,23 @@ class Attendance(models.Model):
         on_delete=models.CASCADE,
         related_name='attendance'
     )
+
     date = models.DateField(auto_now_add=True)
+
     login_time = models.TimeField(null=True, blank=True)
     logout_time = models.TimeField(null=True, blank=True)
+
+    # ⏱ Time Calculations
     total_hours = models.DurationField(null=True, blank=True)
-    break_time = models.DurationField(default=timedelta(minutes=0))
+    break_time = models.DurationField(default=timedelta())
     net_working_hours = models.DurationField(null=True, blank=True)
+
+    # ⏰ Late calculation
+    late_by = models.DurationField(null=True, blank=True)
 
     STATUS_CHOICES = [
         ('Present', 'Present'),
+        ('Late', 'Late'),
         ('Absent', 'Absent'),
     ]
 

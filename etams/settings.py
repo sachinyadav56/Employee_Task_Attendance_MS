@@ -160,5 +160,6 @@ JAZZMIN_SETTINGS = {
     "dark_mode_theme": "darkly",
 }
 
-TIME_ZONE = 'Asia/Kolkata'
+
 USE_TZ = True
+TIME_ZONE = "Asia/Kolkata"

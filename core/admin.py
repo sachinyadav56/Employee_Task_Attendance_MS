@@ -26,4 +26,14 @@ class TaskAdmin(admin.ModelAdmin):
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-    list_display = ('employee', 'date', 'login_time', 'logout_time', 'status')
+    list_display = (
+        'employee',
+        'date',
+        'login_time',
+        'logout_time',
+        'status',
+        'late_by',
+        'break_time',
+        'net_working_hours',
+    )
+    list_filter = ('status', 'date')

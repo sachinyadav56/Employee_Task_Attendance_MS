@@ -11,11 +11,12 @@ from .decorators import employee_login_required
 # EMPLOYEE LOGIN
 def employee_login(request):
     if request.method == 'POST':
-        emp_id = request.POST.get('employee_id').strip()
+        emp_id = request.POST.get('employee_id', '').strip()
         department = request.POST.get('department')
-        role = request.POST.get('role') 
-        password = request.POST.get('password').strip()
+        role = request.POST.get('role')
+        password = request.POST.get('password', '').strip()
 
+        # ---------- AUTHENTICATION ----------
         try:
             employee = Employee.objects.get(
                 employee_id=emp_id,
@@ -24,52 +25,123 @@ def employee_login(request):
                 is_active=True
             )
         except Employee.DoesNotExist:
-            messages.error(request, "Invalid Credentials: ID, Department, or Role mismatch.")
+            messages.error(request, "Invalid Employee ID / Department / Role")
             return redirect('employee_login')
 
         if not employee.check_password(password):
             messages.error(request, "Invalid password")
             return redirect('employee_login')
 
+        # ---------- LOGIN SUCCESS ----------
         request.session['employee_id'] = employee.id
 
-        # Create Attendance Record immediately upon login
-        Attendance.objects.get_or_create(
+        now = timezone.localtime(timezone.now())
+        login_time = now.time()
+
+        # ---------- COMPANY RULES ----------
+        SHIFT_START = time(10, 0)
+        GRACE_TIME = time(10, 15)
+
+        # ---------- STATUS & LATE CALCULATION ----------
+        if login_time <= GRACE_TIME:
+            status = 'Present'
+            late_by = timedelta()
+        else:
+            status = 'Late'
+            dt_login = datetime.combine(date.today(), login_time)
+            dt_grace = datetime.combine(date.today(), GRACE_TIME)
+            late_by = dt_login - dt_grace
+
+        # ---------- ATTENDANCE ----------
+        attendance, created = Attendance.objects.get_or_create(
             employee=employee,
             date=date.today(),
             defaults={
-                'login_time': timezone.localtime(timezone.now()).time(),
-                'status': 'Present'
+                'login_time': login_time,
+                'status': status,
+                'late_by': late_by
             }
         )
+
+        # Safety update if record already exists
+        if not created and not attendance.login_time:
+            attendance.login_time = login_time
+            attendance.status = status
+            attendance.late_by = late_by
+            attendance.save()
+
+        messages.success(request, "Login successful")
         return redirect('employee_dashboard')
 
+    # ---------- GET REQUEST ----------
     departments = Department.objects.all()
     return render(request, 'login.html', {'departments': departments})
 
 
 
-# EMPLOYEE DASHBOARD ✅ FIXED
+# EMPLOYEE DASHBOARD FIXED
 
 @employee_login_required
 def employee_dashboard(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
-    
-    # FIX: Fetch today's attendance so it shows on the dashboard
+
+    # Fetch today's attendance
     attendance = Attendance.objects.filter(
-        employee=employee, 
+        employee=employee,
         date=date.today()
     ).first()
 
-    # Fetch tasks for the dashboard list
-    tasks = Task.objects.filter(employee=employee).order_by('-assigned_date')
+    # Fetch tasks
+    tasks = Task.objects.filter(
+        employee=employee
+    ).order_by('-assigned_date')
+
+    # ---------------- LIVE WORK TIMER ----------------
+    working_seconds = 0
+    late_display = None
+
+    if attendance and attendance.login_time:
+        tz = timezone.get_current_timezone()
+
+        # Current time (aware)
+        now = timezone.localtime(timezone.now())
+
+        # Login datetime (aware)
+        dt_login = timezone.make_aware(
+            datetime.combine(date.today(), attendance.login_time),
+            tz
+        )
+
+        # Safety check
+        if now > dt_login:
+            working_seconds = int((now - dt_login).total_seconds())
+        else:
+            working_seconds = 0
+
+        # ---------------- LATE CALCULATION ----------------
+        office_start = timezone.make_aware(
+            datetime.combine(date.today(), time(10, 15)),  # 10:15 AM
+            tz
+        )
+
+        if dt_login > office_start:
+            late_seconds = int((dt_login - office_start).total_seconds())
+
+            late_hours = late_seconds // 3600
+            late_minutes = (late_seconds % 3600) // 60
+
+            if late_hours > 0:
+                late_display = f"{late_hours} hr {late_minutes} min"
+            else:
+                late_display = f"{late_minutes} min"
 
     return render(request, 'dashboard.html', {
         'employee': employee,
+        'attendance': attendance,
         'tasks': tasks,
-        'attendance': attendance  # Added this
+        'working_seconds': working_seconds,
+        'late_display': late_display,
     })
-
 
 # UPDATE TASK STATUS ✅ NEW
 
@@ -100,47 +172,86 @@ def assign_task(request):
     })
 
 
-# =========================
-# EMPLOYEE LOGOUT
-# =========================
+
+
+from datetime import datetime, time, date
+from django.utils import timezone
+
+def format_time_pro(seconds):
+    """Formats raw seconds into clean 00h 00m 00s format"""
+    h, rem = divmod(int(seconds), 3600)
+    m, s = divmod(rem, 60)
+    return f"{h:02d}h {m:02d}m {s:02d}s"
+
 @employee_login_required
 def employee_logout(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
-
     attendance = Attendance.objects.filter(
         employee=employee,
         date=date.today()
     ).first()
 
-    if attendance and not attendance.logout_time:
-        now = timezone.localtime(timezone.now())
-        attendance.logout_time = now.time()
+    if not attendance or not attendance.login_time:
+        messages.error(request, "No login record found for today.")
+        return redirect('employee_dashboard')
 
-        login_dt = datetime.combine(attendance.date, attendance.login_time)
-        logout_dt = datetime.combine(attendance.date, attendance.logout_time)
+    now = timezone.localtime(timezone.now())
+    logout_time = now.time()
 
-        total = logout_dt - login_dt
+    # ---------------- COMPANY RULES ----------------
+    SHIFT_START = time(10, 0)
+    SHIFT_END = time(17, 0)
 
-        break_time = timedelta()
-        if total >= timedelta(hours=5):
-            break_time = timedelta(hours=1)
+    BREAK_11_30 = timedelta(minutes=15)
+    LUNCH_BREAK = timedelta(minutes=30)
+    BREAK_4_30 = timedelta(minutes=15)
 
-        net_hours = total - break_time
-        if net_hours < timedelta():
-            net_hours = timedelta()
+    TOTAL_BREAK = BREAK_11_30 + LUNCH_BREAK + BREAK_4_30  # 1 hour
+    REQUIRED_WORK = timedelta(hours=8)
 
-        attendance.total_hours = str(total).split('.')[0] # Format as string
-        attendance.break_time = str(break_time).split('.')[0]
-        attendance.net_working_hours = str(net_hours).split('.')[0]
-        attendance.status = 'Present'
-        attendance.save()
+    # ------------------------------------------------
 
+    # Combine date & time
+    dt_login = datetime.combine(date.today(), attendance.login_time)
+    dt_logout = datetime.combine(date.today(), logout_time)
+
+    # Safety: Cap logout at 5 PM
+    if logout_time > SHIFT_END:
+        dt_logout = datetime.combine(date.today(), SHIFT_END)
+
+    # Gross working time
+    gross_work = dt_logout - dt_login
+
+    # Net working time
+    net_work = gross_work - TOTAL_BREAK
+    if net_work < timedelta():
+        net_work = timedelta()
+
+    # ❌ BLOCK LOGOUT IF WORK < 8 HOURS
+    if net_work < REQUIRED_WORK:
+        remaining = REQUIRED_WORK - net_work
+        messages.error(
+            request,
+            f"You must complete 8 working hours. Remaining: {remaining}"
+        )
+        return redirect('employee_dashboard')
+
+    # ✅ SAVE ATTENDANCE
+    attendance.logout_time = dt_logout.time()
+    attendance.total_hours = gross_work
+    attendance.break_time = TOTAL_BREAK
+    attendance.net_working_hours = net_work
+    attendance.status = 'Late' if attendance.late_by and attendance.late_by > timedelta() else 'Present'
+    attendance.save()
+
+    # End session
     request.session.flush()
+    messages.success(request, "Logout successful. Have a great day!")
+
     return redirect('employee_login')
 
-# =========================
 # ADD EMPLOYEE (ADMIN / MANAGER)
-# =========================
+
 def add_employee(request):
     if request.method == 'POST':
         form = EmployeeForm(request.POST)
@@ -163,9 +274,8 @@ def add_employee(request):
 
     return render(request, 'add_employee.html', {'emp_form': form})
 
-# =========================
+
 # ATTENDANCE REPORT
-# =========================
 @employee_login_required
 def attendance_report(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
