@@ -30,11 +30,11 @@ class Employee(models.Model):
     password = models.CharField(max_length=255)  # hashed password
     is_active = models.BooleanField(default=True)
 
-    # 🔐 set password using phone number
+    # set password using phone number
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
 
-    # 🔐 check password
+    # check password
     def check_password(self, raw_password):
         return check_password(raw_password, self.password)
 
@@ -82,7 +82,6 @@ class Attendance(models.Model):
         ('Late', 'Late'),
         ('Absent', 'Absent'),
     ]
-
     status = models.CharField(
         max_length=10,
         choices=STATUS_CHOICES,
