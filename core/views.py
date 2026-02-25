@@ -16,7 +16,7 @@ def employee_login(request):
         role = request.POST.get('role')
         password = request.POST.get('password', '').strip()
 
-        # ---------- AUTHENTICATION ----------
+        # AUTHENTICATION 
         try:
             employee = Employee.objects.get(
                 employee_id=emp_id,
@@ -32,17 +32,17 @@ def employee_login(request):
             messages.error(request, "Invalid password")
             return redirect('employee_login')
 
-        # ---------- LOGIN SUCCESS ----------
+        # LOGIN SUCCESS 
         request.session['employee_id'] = employee.id
 
         now = timezone.localtime(timezone.now())
         login_time = now.time()
 
-        # ---------- COMPANY RULES ----------
+        # COMPANY RULES 
         SHIFT_START = time(10, 0)
         GRACE_TIME = time(10, 15)
 
-        # ---------- STATUS & LATE CALCULATION ----------
+        # STATUS & LATE CALCULATION 
         if login_time <= GRACE_TIME:
             status = 'Present'
             late_by = timedelta()
@@ -52,7 +52,7 @@ def employee_login(request):
             dt_grace = datetime.combine(date.today(), GRACE_TIME)
             late_by = dt_login - dt_grace
 
-        # ---------- ATTENDANCE ----------
+        # ATTENDANCE 
         attendance, created = Attendance.objects.get_or_create(
             employee=employee,
             date=date.today(),
@@ -73,7 +73,7 @@ def employee_login(request):
         messages.success(request, "Login successful")
         return redirect('employee_dashboard')
 
-    # ---------- GET REQUEST ----------
+    # GET REQUEST 
     departments = Department.objects.all()
     return render(request, 'login.html', {'departments': departments})
 
@@ -96,7 +96,7 @@ def employee_dashboard(request):
         employee=employee
     ).order_by('-assigned_date')
 
-    # ---------------- LIVE WORK TIMER ----------------
+    #  LIVE WORK TIMER 
     working_seconds = 0
     late_display = None
 
@@ -143,7 +143,7 @@ def employee_dashboard(request):
         'late_display': late_display,
     })
 
-# UPDATE TASK STATUS ✅ NEW
+# UPDATE TASK STATUS NEW
 
 @employee_login_required
 def update_task_status(request, task_id):
@@ -169,9 +169,6 @@ def assign_task(request):
         'tasks': tasks,
         'employee': employee
     })
-
-
-
 
 from datetime import datetime, time, date
 from django.utils import timezone
@@ -235,7 +232,7 @@ def employee_logout(request):
         )
         return redirect('employee_dashboard')
 
-    # ✅ SAVE ATTENDANCE
+    # SAVE ATTENDANCE
     attendance.logout_time = dt_logout.time()
     attendance.total_hours = gross_work
     attendance.break_time = TOTAL_BREAK
