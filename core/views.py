@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime, timedelta, date
+from datetime import time
 
 from .models import Employee, Task, Attendance, Department
 from .forms import EmployeeForm, TaskForm
@@ -170,8 +171,6 @@ def assign_task(request):
         'employee': employee
     })
 
-from datetime import datetime, time, date
-from django.utils import timezone
 
 def format_time_pro(seconds):
     """Formats raw seconds into clean 00h 00m 00s format"""
@@ -182,70 +181,45 @@ def format_time_pro(seconds):
 @employee_login_required
 def employee_logout(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
-    attendance = Attendance.objects.filter(
-        employee=employee,
-        date=date.today()
-    ).first()
-
-    if not attendance or not attendance.login_time:
-        messages.error(request, "No login record found for today.")
-        return redirect('employee_dashboard')
+    attendance = Attendance.objects.filter(employee=employee, date=date.today()).first()
 
     now = timezone.localtime(timezone.now())
     logout_time = now.time()
 
-    # COMPANY RULES 
-    SHIFT_START = time(10, 0)
-    SHIFT_END = time(17, 0)
+    tz = timezone.get_current_timezone()
+    dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
+    dt_logout = timezone.make_aware(datetime.combine(date.today(), logout_time), tz)
 
-    BREAK_11_30 = timedelta(minutes=15)
-    LUNCH_BREAK = timedelta(minutes=30)
-    BREAK_4_30 = timedelta(minutes=15)
+    SHIFT_END = timezone.make_aware(datetime.combine(date.today(), time(17, 0)), tz)
+    if dt_logout > SHIFT_END:
+        dt_logout = SHIFT_END
 
-    TOTAL_BREAK = BREAK_11_30 + LUNCH_BREAK + BREAK_4_30  # 1 hour
-    REQUIRED_WORK = timedelta(hours=8)
-
-    
-
-    # Combine date & time
-    dt_login = datetime.combine(date.today(), attendance.login_time)
-    dt_logout = datetime.combine(date.today(), logout_time)
-
-    # Safety: Cap logout at 5 PM
-    if logout_time > SHIFT_END:
-        dt_logout = datetime.combine(date.today(), SHIFT_END)
-
-    # Gross working time
     gross_work = dt_logout - dt_login
 
-    # Net working time
-    net_work = gross_work - TOTAL_BREAK
+    break_seconds = int(request.GET.get("break_seconds", 0))
+    real_break = timedelta(seconds=break_seconds)
+
+    net_work = gross_work - real_break
     if net_work < timedelta():
         net_work = timedelta()
 
-    #  BLOCK LOGOUT IF WORK < 8 HOURS
+    REQUIRED_WORK = timedelta(hours=8)
+
     if net_work < REQUIRED_WORK:
         remaining = REQUIRED_WORK - net_work
-        messages.error(
-            request,
-            f"You must complete 8 working hours. Remaining: {remaining}"
-        )
+        messages.error(request, f"You must complete 8 working hours. Remaining: {remaining}")
         return redirect('employee_dashboard')
 
-    # SAVE ATTENDANCE
     attendance.logout_time = dt_logout.time()
     attendance.total_hours = gross_work
-    attendance.break_time = TOTAL_BREAK
+    attendance.break_time = real_break
     attendance.net_working_hours = net_work
     attendance.status = 'Late' if attendance.late_by and attendance.late_by > timedelta() else 'Present'
     attendance.save()
 
-    # End session
     request.session.flush()
     messages.success(request, "Logout successful. Have a great day!")
-
     return redirect('employee_login')
-
 # ADD EMPLOYEE (ADMIN / MANAGER)
 
 def add_employee(request):
@@ -271,11 +245,25 @@ def add_employee(request):
     return render(request, 'add_employee.html', {'emp_form': form})
 
 
+
+def format_td(td):
+    if not td:
+        return "00h 00m 00s"
+    total_seconds = int(td.total_seconds())
+    h, rem = divmod(total_seconds, 3600)
+    m, s = divmod(rem, 60)
+    return f"{h:02d}h {m:02d}m {s:02d}s"
+
 # ATTENDANCE REPORT
 @employee_login_required
 def attendance_report(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
     records = employee.attendance.all()
+
+    for r in records:
+        r.total_hours_fmt = format_td(r.total_hours)
+        r.break_time_fmt = format_td(r.break_time)
+        r.net_working_fmt = format_td(r.net_working_hours)
 
     return render(request, 'attendance_report.html', {'records': records})
 

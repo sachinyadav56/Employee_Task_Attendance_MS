@@ -64,7 +64,7 @@ class Attendance(models.Model):
         related_name='attendance'
     )
 
-    date = models.DateField(auto_now_add=True)
+    date = models.DateField()
 
     login_time = models.TimeField(null=True, blank=True)
     logout_time = models.TimeField(null=True, blank=True)

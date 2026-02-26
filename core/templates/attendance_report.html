@@ -11,190 +11,210 @@
 
     <style>
         :root {
-            --primary-blue: #0d6efd;
-            --danger-red: #dc3545;
-            --success-green: #10b981;
-            --warning-amber: #f59e0b;
-            --glass-bg: rgba(255, 255, 255, 0.9);
+            --primary-blue: #2563eb;
+            --bg-slate: #f8fafc;
+            --card-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.04), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
         }
 
         body {
-            background-color: #f1f5f9;
+            background-color: var(--bg-slate);
             font-family: 'Inter', sans-serif;
-            color: #1e293b;
-            padding: 2rem;
+            color: #334155;
+            padding: 1.5rem;
         }
 
-        /* --- Page Header --- */
+        /* --- Header Styles --- */
         .page-header {
-            background: white;
-            padding: 1.25rem 2rem;
-            border-radius: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            background: #ffffff;
+            padding: 1.5rem 2rem;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
             margin-bottom: 2rem;
+            border: 1px solid #f1f5f9;
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-        }
-
-        .page-title {
+            justify-content: center;
+            background: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+            color: white;
+            border-radius: 12px;
             font-size: 1.25rem;
-            font-weight: 700;
-            margin: 0;
-            color: #0f172a;
         }
 
-        /* --- Table Container --- */
+        /* --- Card & Table Styles --- */
         .report-card {
-            background: var(--glass-bg);
-            border: none;
-            border-radius: 16px;
+            background: #ffffff;
+            border: 1px solid #f1f5f9;
+            border-radius: 20px;
+            box-shadow: var(--card-shadow);
             overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
         }
 
-        .table {
-            margin-bottom: 0;
-            font-size: 0.9rem;
+        .table-responsive {
+            scrollbar-width: thin;
         }
 
         .table thead th {
-            background-color: #1e293b;
-            color: #f8fafc;
+            background-color: #f8fafc;
+            color: #64748b;
             font-weight: 600;
+            font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.025em;
-            padding: 1rem;
-            border: none;
+            letter-spacing: 0.05em;
+            padding: 1.25rem 1rem;
+            border-bottom: 1px solid #f1f5f9;
         }
 
         .table tbody td {
-            padding: 1rem;
+            padding: 1.25rem 1rem;
             vertical-align: middle;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .table tbody tr:last-child td {
-            border-bottom: none;
+            color: #475569;
+            font-size: 0.9rem;
+            border-bottom: 1px solid #f8fafc;
         }
 
         .table tbody tr:hover {
-            background-color: #f8fafc;
+            background-color: #f1f5f9;
+            transition: background 0.2s ease;
         }
 
         /* --- Status Badges --- */
         .badge-status {
-            padding: 0.5em 1em;
-            border-radius: 9999px;
+            padding: 6px 12px;
+            border-radius: 8px;
             font-weight: 600;
             font-size: 0.75rem;
-            letter-spacing: 0.05em;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .bg-late {
-            background-color: #fef3c7;
-            color: #92400e;
-        }
+        .bg-late { background-color: #fff7ed; color: #c2410c; border: 1px solid #ffedd5; }
+        .bg-present { background-color: #f0fdf4; color: #15803d; border: 1px solid #dcfce7; }
 
-        .bg-present {
-            background-color: #d1fae5;
-            color: #065f46;
-        }
+        /* --- Time Formatting --- */
+        .time-text { color: #1e293b; font-weight: 500; }
+        .work-hours { color: #2563eb; font-weight: 700; background: #eff6ff; padding: 4px 8px; border-radius: 6px; }
+        .break-hours { color: #ef4444; font-weight: 600; }
 
-        /* --- Custom Time Colors --- */
-        .work-hours {
-            color: var(--primary-blue);
-            font-weight: 700;
-        }
-
-        .break-hours {
-            color: var(--danger-red);
-            font-weight: 700;
-        }
-
+        /* --- Buttons --- */
         .btn-custom {
-            border-radius: 8px;
+            border-radius: 10px;
+            padding: 0.6rem 1.25rem;
             font-weight: 500;
-            padding: 0.5rem 1rem;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .btn-custom:hover {
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            body { padding: 1rem; }
+            .page-header { 
+                flex-direction: column; 
+                text-align: center; 
+                gap: 1.5rem;
+                padding: 1.5rem 1rem;
+            }
+            .page-header .d-flex { flex-direction: column; }
+            .icon-box { margin: 0 auto 1rem !important; }
         }
     </style>
 </head>
 <body>
 
-<div class="container-fluid">
-    <header class="page-header">
+<div class="container-fluid max-width-container" style="max-width: 1400px; margin: 0 auto;">
+    <header class="page-header d-md-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center">
-            <div class="bg-primary text-white rounded-3 p-2 me-3">
-                <i class="bi bi-calendar-check-fill fs-5"></i>
+            <div class="icon-box me-3 shadow-sm">
+                <i class="bi bi-calendar-check"></i>
             </div>
             <div>
-                <h1 class="page-title">Attendance History</h1>
-                <p class="text-muted small mb-0">Detailed log of your working hours and breaks</p>
+                <h1 class="h4 fw-bold mb-1">Attendance History</h1>
+                <p class="text-muted small mb-0">Track your productivity and attendance logs</p>
             </div>
         </div>
         <div class="d-flex gap-2">
-            <a href="{% url 'employee_dashboard' %}" class="btn btn-outline-primary btn-custom">
-                <i class="bi bi-speedometer2 me-2"></i>Dashboard
-            </a>
-            <a href="{% url 'employee_logout' %}" class="btn btn-danger btn-custom shadow-sm">
-                <i class="bi bi-box-arrow-right me-2"></i>Logout
+            <a href="{% url 'employee_dashboard' %}" class="btn btn-outline-dark btn-custom">
+                <i class="bi bi-grid-1x2 me-2"></i>Dashboard
             </a>
         </div>
     </header>
 
     <div class="card report-card">
         <div class="table-responsive">
-            <table class="table table-hover text-center">
+            <table class="table align-middle">
                 <thead>
                     <tr>
-                        <th>Date</th>
-                        <th>Login Time</th>
-                        <th>Logout Time</th>
-                        <th>Total Work</th>
-                        <th>Break Time</th>
-                        <th>Status</th>
+                        <th class="ps-4">Date</th>
+                        <th>Clock In</th>
+                        <th>Clock Out</th>
+                        <th>Total Logged</th>
+                        <th>Break</th>
+                        <th>Net Work</th>
+                        <th class="text-end pe-4">Status</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for a in records %}
                     <tr>
-                        <td class="fw-medium text-dark">{{ a.date|date:"d M Y" }}</td>
-                        <td>
-                            <span class="text-secondary"><i class="bi bi-clock-in me-1"></i></span>
+                        <td class="ps-4">
+                            <span class="fw-bold text-dark">{{ a.date|date:"d M Y" }}</span>
+                        </td>
+
+                        <td class="time-text">
+                            <i class="bi bi-box-arrow-in-right text-muted me-2"></i>
                             {{ a.login_time|time:"h:i A"|default:"--" }}
                         </td>
-                        <td>
-                            <span class="text-secondary"><i class="bi bi-clock-history me-1"></i></span>
+
+                        <td class="time-text">
+                            <i class="bi bi-box-arrow-left text-muted me-2"></i>
                             {{ a.logout_time|time:"h:i A"|default:"--" }}
                         </td>
+
                         <td>
-                            <span class="work-hours">{{ a.total_hours|default:"00h 00m 00s" }}</span>
+                            <span class="work-hours small">
+                                {{ a.total_hours_fmt|default:"00h 00m" }}
+                            </span>
                         </td>
+
                         <td>
-                            <span class="break-hours">{{ a.break_time|default:"00h 00m 00s" }}</span>
+                            <span class="break-hours small">
+                                {{ a.break_time_fmt|default:"0h 0m" }}
+                            </span>
                         </td>
+
                         <td>
+                            <span class="fw-bold text-dark">
+                                {{ a.net_working_fmt|default:"00h 00m" }}
+                            </span>
+                        </td>
+
+                        <td class="text-end pe-4">
                             {% if a.status == "Late" %}
-                                <span class="badge-status bg-late text-uppercase">
-                                    <i class="bi bi-exclamation-triangle-fill me-1"></i>Late
+                                <span class="badge-status bg-late">
+                                    <i class="bi bi-clock-history"></i> Late
                                 </span>
                             {% else %}
-                                <span class="badge-status bg-present text-uppercase">
-                                    <i class="bi bi-check-circle-fill me-1"></i>Present
+                                <span class="badge-status bg-present">
+                                    <i class="bi bi-check2-circle"></i> Present
                                 </span>
                             {% endif %}
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="6" class="py-5 text-center">
-                            <i class="bi bi-folder2-open display-4 text-muted d-block mb-3"></i>
-                            <span class="text-muted">No attendance records found for this period.</span>
+                        <td colspan="7" class="py-5 text-center">
+                            <div class="py-4">
+                                <i class="bi bi-clipboard2-x display-4 text-light-emphasis d-block mb-3"></i>
+                                <h5 class="text-muted fw-normal">No records found for this period</h5>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
