@@ -14,20 +14,14 @@
             background: #f4f7fb;
             font-family: "Segoe UI", system-ui, sans-serif;
         }
-
-        /* Navbar */
         .navbar {
             background: linear-gradient(90deg, #0f172a, #1e293b);
         }
-
-        /* Cards */
         .card {
             border-radius: 16px;
             border: none;
             box-shadow: 0 10px 25px rgba(0,0,0,0.08);
         }
-
-        /* Stats */
         .stat-label {
             font-size: 13px;
             color: #64748b;
@@ -35,16 +29,12 @@
         .stat-value {
             font-weight: 600;
         }
-
-        /* Badges */
         .badge-late {
             background: #facc15;
             color: #1e293b;
         }
-
-        /* Timers */
         .timer {
-            font-size: 1.3rem;
+            font-size: 1.4rem;
             font-weight: 700;
             letter-spacing: 1px;
         }
@@ -54,17 +44,13 @@
         .timer.break {
             color: #dc2626;
         }
-
-        /* Responsive row spacing */
-        .row.g-4 {
-            margin-top: 10px;
-        }
     </style>
 </head>
+
 <body>
 
 <!-- NAVBAR -->
-<nav class="navbar navbar-dark px-4 py-3 d-flex justify-content-between align-items-center">
+<nav class="navbar navbar-dark px-4 py-3">
     <span class="navbar-brand fw-bold fs-5">
         <i class="bi bi-cpu-fill me-1"></i> ETAMS
     </span>
@@ -75,7 +61,7 @@
         <a href="{% url 'assigned_tasks' %}" class="btn btn-outline-light btn-sm me-2">
             <i class="bi bi-list-task"></i> Assigned Tasks
         </a>
-        <button id="logoutBtn" class="btn btn-danger btn-sm" disabled>
+        <button id="logoutBtn" class="btn btn-danger btn-sm">
             <i class="bi bi-box-arrow-right"></i> Logout
         </button>
     </div>
@@ -83,12 +69,11 @@
 
 <div class="container my-4">
 
-    <!-- Header Card -->
+    <!-- HEADER CARD -->
     <div class="card p-4 mb-4">
         <h4 class="fw-bold mb-1">Welcome, {{ employee.employee_id }}</h4>
         <div class="text-muted">
             {{ employee.department.name }} Department · {{ employee.role }}
-
             {% if attendance and attendance.status == "Late" %}
                 <span class="badge badge-late ms-2">Late</span>
             {% else %}
@@ -99,19 +84,14 @@
 
     <div class="row g-4">
 
-        <!-- Attendance Card -->
-        <div class="col-lg-4">
+        <!-- ATTENDANCE CARD -->
+        <div class="col-lg-6">
             <div class="card p-4 h-100">
-                <h6 class="fw-bold mb-3">
-                    <i class="bi bi-clock-history me-1"></i> Today's Attendance
-                </h6>
+                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-1"></i> Today's Attendance</h6>
 
-                <!-- Login -->
                 <div class="mb-3">
                     <div class="stat-label">Login Time</div>
-                    <div class="stat-value">
-                        {{ attendance.login_time|time:"h:i A"|default:"--" }}
-                    </div>
+                    <div class="stat-value">{{ attendance.login_time|time:"h:i A"|default:"--" }}</div>
                     {% if late_display %}
                         <div class="text-danger small mt-1">
                             <i class="bi bi-exclamation-triangle-fill"></i>
@@ -120,15 +100,11 @@
                     {% endif %}
                 </div>
 
-                <!-- Logout -->
                 <div class="mb-3">
                     <div class="stat-label">Logout Time</div>
-                    <div class="stat-value">
-                        {{ attendance.logout_time|time:"h:i A"|default:"--" }}
-                    </div>
+                    <div class="stat-value">{{ attendance.logout_time|time:"h:i A"|default:"--" }}</div>
                 </div>
 
-                <!-- Break -->
                 <div class="mb-4">
                     <div class="stat-label text-danger">Total Break</div>
                     <div class="timer break" id="breakTimer">00:00:00</div>
@@ -136,7 +112,6 @@
 
                 <hr>
 
-                <!-- Live Working -->
                 <div>
                     <div class="stat-label text-primary">Live Working Time</div>
                     <div class="timer work" id="workTimer">00:00:00</div>
@@ -144,68 +119,118 @@
             </div>
         </div>
 
+        <!-- TASKS CARD -->
+        <div class="col-lg-6">
+            <div class="card p-4 h-100">
+                <h6 class="fw-bold mb-3"><i class="bi bi-list-task me-1"></i> My Tasks</h6>
+
+                {% if tasks %}
+                    {% for task in tasks %}
+                        <div class="border rounded-3 p-3 mb-2 d-flex justify-content-between align-items-center">
+                            <div>
+                                <div class="fw-semibold {% if task.is_completed %}text-muted text-decoration-line-through{% endif %}">
+                                    {{ task.title }}
+                                </div>
+                                <small class="text-muted">{{ task.description }}</small>
+                            </div>
+
+                            {% if not task.is_completed %}
+                                <a href="{% url 'update_task_status' task.id %}" class="btn btn-outline-success btn-sm">
+                                    Done
+                                </a>
+                            {% else %}
+                                <i class="bi bi-check-circle-fill text-success fs-5"></i>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted text-center mt-4">No tasks assigned</p>
+                {% endif %}
+            </div>
+        </div>
+
     </div>
 </div>
 
-<!-- ================= LIVE TIMER SCRIPT ================= -->
 <script>
-  // Load saved timers from localStorage
-  let workSeconds = parseInt(localStorage.getItem("workSeconds")) || {{ working_seconds|default:0 }};
-  let breakSeconds = parseInt(localStorage.getItem("breakSeconds")) || 0;
+const workTimer = document.getElementById("workTimer");
+const breakTimer = document.getElementById("breakTimer");
+const logoutBtn = document.getElementById("logoutBtn");
 
-  const workTimer = document.getElementById("workTimer");
-  const breakTimer = document.getElementById("breakTimer");
-  const logoutBtn = document.getElementById("logoutBtn");
+let workSeconds = parseInt(localStorage.getItem("work_seconds")) || {{ working_seconds|default:0 }};
+let breakSeconds = parseInt(localStorage.getItem("break_seconds")) || 0;
 
-  // Break windows (minutes from midnight)
-  const breaks = [
-      { start: 11*60+30, end: 11*60+45 }, // 11:30–11:45
-      { start: 13*60+0, end: 13*60+30 },  // 13:00–13:30
-      { start: 16*60+30, end: 16*60+45 }  // 16:30–16:45
-  ];
+const breaks = [
+    { name: "morning", start: 11*60+30, end: 11*60+45 },
+    { name: "lunch",   start: 13*60+0,  end: 13*60+30 },
+    { name: "evening", start: 16*60+30, end: 16*60+45 }
+];
 
-  function format(sec){
-      const h = Math.floor(sec/3600);
-      const m = Math.floor((sec%3600)/60);
-      const s = sec%60;
-      return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-  }
+function format(sec){
+    const h = Math.floor(sec/3600);
+    const m = Math.floor((sec%3600)/60);
+    const s = sec%60;
+    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+}
 
-  function isBreakTime(){
-      const now = new Date();
-      const mins = now.getHours()*60 + now.getMinutes();
-      return breaks.some(b => mins >= b.start && mins < b.end);
-  }
+function isBreakTime(){
+    const now = new Date();
+    const mins = now.getHours()*60 + now.getMinutes();
+    return breaks.some(b => mins >= b.start && mins < b.end);
+}
 
-  let logoutEnabled = false;
+let onBreak = false;
 
-  setInterval(() => {
-      const onBreak = isBreakTime();
+setInterval(() => {
+    const breakNow = isBreakTime();
 
-      if (onBreak) {
-          breakSeconds++;
-          localStorage.setItem("breakSeconds", breakSeconds);
-      }
+    if(breakNow && !onBreak){
+        onBreak = true;
+    }
+    if(!breakNow && onBreak){
+        onBreak = false;
+    }
 
-      workSeconds++;
-      localStorage.setItem("workSeconds", workSeconds);
+    if(onBreak){
+        breakSeconds++;
+        breakTimer.innerText = format(breakSeconds);
+    } else {
+        workSeconds++;
+        workTimer.innerText = format(workSeconds);
+    }
 
-      workTimer.innerText = format(workSeconds);
-      breakTimer.innerText = format(breakSeconds);
+    localStorage.setItem("work_seconds", workSeconds);
+    localStorage.setItem("break_seconds", breakSeconds);
 
-      // Enable logout after 8 working hours
-      if (workSeconds >= 28800 && !logoutEnabled) {
-          logoutEnabled = true;
-          logoutBtn.disabled = false;
-      }
-  }, 1000);
+}, 1000);
 
-  logoutBtn.onclick = () => {
-      if (logoutEnabled) {
-          // Clear timers on logout and redirect
-          window.location.href = "{% url 'employee_logout' %}";
-      }
-  };
+// LOGOUT SEND DATA TO SERVER
+logoutBtn.onclick = () => {
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "{% url 'employee_logout' %}";
+
+    const csrfInput = document.createElement("input");
+    csrfInput.type = "hidden";
+    csrfInput.name = "csrfmiddlewaretoken";
+    csrfInput.value = '{{ csrf_token }}';
+    form.appendChild(csrfInput);
+
+    const workInput = document.createElement("input");
+    workInput.type = "hidden";
+    workInput.name = "work_seconds";
+    workInput.value = workSeconds;
+    form.appendChild(workInput);
+
+    const breakInput = document.createElement("input");
+    breakInput.type = "hidden";
+    breakInput.name = "break_seconds";
+    breakInput.value = breakSeconds;
+    form.appendChild(breakInput);
+
+    document.body.appendChild(form);
+    form.submit();
+};
 </script>
 
 </body>
