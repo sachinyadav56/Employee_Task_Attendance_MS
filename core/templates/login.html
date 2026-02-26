@@ -80,14 +80,8 @@
         }
 
         @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -119,25 +113,22 @@
             </div>
 
             <div class="form-floating mb-3">
-                <select name="department" class="form-select" required>
+                <select name="department" id="departmentSelect" class="form-select" required>
                     <option value="">Select Department</option>
                     {% for dept in departments %}
-                        <option value="{{ dept.name }}">{{ dept.name }}</option>
+                        <option value="{{ dept.id }}">{{ dept.name }}</option>
                     {% endfor %}
                 </select>
                 <label>Department</label>
             </div>
 
             <div class="form-floating mb-3">
-                <select name="role" class="form-select" required>
+                <select name="role" id="roleSelect" class="form-select" required>
                     <option value="">Select Role</option>
-                    <option value="ADMIN">Admin</option>
-                    <option value="MANAGER">Manager</option>
-                    <option value="EMPLOYEE">Employee</option>
                 </select>
-                
                 <label>Role</label>
             </div>
+
             <div class="form-floating mb-3">
                 <input type="password" name="password" class="form-control" placeholder="Password" required>
                 <label>Password</label>
@@ -153,6 +144,31 @@
         </div>
     </div>
 </div>
+
+<script>
+    const deptSelect = document.getElementById('departmentSelect');
+    const roleSelect = document.getElementById('roleSelect');
+
+    deptSelect.addEventListener('change', function () {
+        const deptId = this.value;
+        roleSelect.innerHTML = '<option value="">Loading roles...</option>';
+
+        fetch(`/get-roles/?department_id=${deptId}`)
+            .then(res => res.json())
+            .then(data => {
+                roleSelect.innerHTML = '<option value="">Select Role</option>';
+                data.forEach(role => {
+                    const option = document.createElement('option');
+                    option.value = role.id;
+                    option.textContent = role.name;
+                    roleSelect.appendChild(option);
+                });
+            })
+            .catch(() => {
+                roleSelect.innerHTML = '<option value="">Error loading roles</option>';
+            });
+    });
+</script>
 
 </body>
 </html>

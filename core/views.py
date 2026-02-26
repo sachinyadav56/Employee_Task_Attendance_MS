@@ -6,21 +6,31 @@ from datetime import datetime, timedelta, date, time
 from .models import Employee, Task, Attendance, Department
 from .forms import EmployeeForm, TaskForm
 from .decorators import employee_login_required
+from django.http import JsonResponse
+from .models import Role
 
 
 # EMPLOYEE LOGIN
+# EMPLOYEE LOGIN
 def employee_login(request):
+    # Handle AJAX request to fetch roles for a department
+    if request.method == 'GET' and request.GET.get('dept_id'):
+        dept_id = request.GET.get('dept_id')
+        roles = Role.objects.filter(department_id=dept_id).values('id', 'name')
+        return JsonResponse(list(roles), safe=False)
+
+    # Handle login form submission
     if request.method == 'POST':
         emp_id = request.POST.get('employee_id', '').strip()
-        department = request.POST.get('department')
-        role = request.POST.get('role')
+        department_id = request.POST.get('department')
+        role_id = request.POST.get('role')
         password = request.POST.get('password', '').strip()
 
         try:
             employee = Employee.objects.get(
                 employee_id=emp_id,
-                department__name=department,
-                role=role,
+                department_id=department_id,
+                role_id=role_id,
                 is_active=True
             )
         except Employee.DoesNotExist:
@@ -31,11 +41,12 @@ def employee_login(request):
             messages.error(request, "Invalid password")
             return redirect('employee_login')
 
-        # LOGIN SUCCESS
+        # Set session
         request.session['employee_id'] = employee.id
+
+        # Attendance logic
         now = timezone.localtime(timezone.now())
         login_time = now.time()
-
         SHIFT_START = time(10, 0)
         GRACE_TIME = time(10, 15)
 
@@ -70,9 +81,9 @@ def employee_login(request):
         messages.success(request, "Login successful")
         return redirect('employee_dashboard')
 
+    # GET request to render login page
     departments = Department.objects.all()
     return render(request, 'login.html', {'departments': departments})
-
 
 # EMPLOYEE DASHBOARD
 @employee_login_required
@@ -230,3 +241,10 @@ def attendance_report(request):
         r.net_working_fmt = format_td(r.net_working_hours)
 
     return render(request, 'attendance_report.html', {'records': records})
+
+
+
+def get_roles(request):
+    department_id = request.GET.get('department_id')
+    roles = Role.objects.filter(department_id=department_id).values('id', 'name')
+    return JsonResponse(list(roles), safe=False)
