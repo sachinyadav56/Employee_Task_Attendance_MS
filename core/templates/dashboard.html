@@ -5,204 +5,204 @@
     <title>Employee Dashboard | ETAMS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
+        :root {
+            --bg-body: #f4f7fa;
+            --slate-900: #0f172a;
+            --indigo-600: #4f46e5;
+            --rose-600: #e11d48;
+            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+
         body {
-            background: #f4f7fb;
-            font-family: "Segoe UI", system-ui, sans-serif;
+            background-color: var(--bg-body);
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--slate-900);
         }
-        .navbar {
-            background: linear-gradient(90deg, #0f172a, #1e293b);
-        }
-        .card {
-            border-radius: 16px;
-            border: none;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-        }
-        .stat-label {
-            font-size: 13px;
-            color: #64748b;
-        }
-        .stat-value {
-            font-weight: 600;
-        }
-        .badge-late {
-            background: #facc15;
-            color: #1e293b;
-        }
-        .timer {
-            font-size: 1.4rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-        .timer.work {
-            color: #2563eb;
-        }
-        .timer.break {
-            color: #dc2626;
-        }
+
+        .navbar { background: var(--slate-900); padding: 1rem 1.5rem; }
+
+        .card { border: none; border-radius: 12px; box-shadow: var(--shadow-md); background: #ffffff; overflow: hidden; height: 100%; }
+
+        .field-card { padding: 1.5rem; display: flex; flex-direction: column; }
+        .accent-login { border-top: 5px solid #64748b; }
+        .accent-logout { border-top: 5px solid #3b82f6; }
+        .accent-break { border-top: 5px solid var(--rose-600); }
+        .accent-work { border-top: 5px solid var(--indigo-600); }
+
+        .field-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 0.75rem; }
+        .field-value { font-size: 1.7rem; font-weight: 700; white-space: nowrap; }
+
+        .timer-font { font-family: 'Courier New', monospace; }
+        .text-break { color: var(--rose-600); }
+        .text-work { color: var(--indigo-600); }
+
+        #logoutBtn:disabled { background: #e2e8f0; color: #94a3b8; border: 1px solid #cbd5e1; cursor: not-allowed; opacity: 0.7; }
+        .btn-logout-active { background: rgba(225, 29, 72, 0.1); color: var(--rose-600); border: 1px solid var(--rose-600); }
+        .btn-logout-active:hover { background: var(--rose-600); color: white; }
     </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-dark px-4 py-3">
-    <span class="navbar-brand fw-bold fs-5">
-        <i class="bi bi-cpu-fill me-1"></i> ETAMS
-    </span>
-    <div>
-        <a href="{% url 'attendance_report' %}" class="btn btn-outline-light btn-sm me-2">
-            <i class="bi bi-calendar-check"></i> Attendance
-        </a>
-        <a href="{% url 'assigned_tasks' %}" class="btn btn-outline-light btn-sm me-2">
-            <i class="bi bi-list-task"></i> Assigned Tasks
-        </a>
-        <button id="logoutBtn" class="btn btn-danger btn-sm">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </button>
+<nav class="navbar navbar-dark mb-4">
+    <div class="container-fluid">
+        <span class="navbar-brand fw-bold"><i class="bi bi-cpu-fill text-info me-2"></i> ETAMS</span>
+        <div class="d-flex gap-2">
+            <!-- Attendance Report -->
+            <a href="{% url 'attendance_report' %}" class="btn btn-sm btn-outline-light px-3">
+                <i class="bi bi-calendar-check me-1"></i> Attendance
+            </a>
+
+            <!-- Assigned Tasks -->
+            <a href="{% url 'assigned_tasks' %}" class="btn btn-sm btn-outline-light px-3">
+                <i class="bi bi-list-task me-1"></i> Tasks
+            </a>
+
+            <!-- Logout -->
+            <button id="logoutBtn" class="btn btn-sm btn-logout-active px-3" disabled title="Shift not ended yet">
+                <i class="bi bi-lock-fill me-1" id="logoutIcon"></i> Logout
+            </button>
+        </div>
     </div>
 </nav>
 
-<div class="container my-4">
-
-    <!-- HEADER CARD -->
-    <div class="card p-4 mb-4">
-        <h4 class="fw-bold mb-1">Welcome, {{ employee.employee_id }}</h4>
-        <div class="text-muted">
-            {{ employee.department.name }} Department · {{ employee.role }}
-            {% if attendance and attendance.status == "Late" %}
-                <span class="badge badge-late ms-2">Late</span>
-            {% else %}
-                <span class="badge bg-success ms-2">Present</span>
-            {% endif %}
+<div class="container">
+    <div class="card p-4 mb-4 border-start border-info border-5">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h4 class="fw-bold mb-1">Employee ID: {{ employee.employee_id }}</h4>
+            <h4 class="fw-bold mb-1">Department: {{ employee.department.name }}</h4>
+            <h4 class="fw-bold mb-1">Role: {{ employee.role }}</h4>
+            <p id="shiftStatus" class="text-muted mb-0 small mt-1">Checking shift status...</p>
         </div>
+        <div id="statusBadge"></div>
     </div>
+</div>
 
     <div class="row g-4">
-
-        <!-- ATTENDANCE CARD -->
-        <div class="col-lg-6">
-            <div class="card p-4 h-100">
-                <h6 class="fw-bold mb-3"><i class="bi bi-clock-history me-1"></i> Today's Attendance</h6>
-
-                <div class="mb-3">
-                    <div class="stat-label">Login Time</div>
-                    <div class="stat-value">{{ attendance.login_time|time:"h:i A"|default:"--" }}</div>
-                    {% if late_display %}
-                        <div class="text-danger small mt-1">
-                            <i class="bi bi-exclamation-triangle-fill"></i>
-                            Late by {{ late_display }}
-                        </div>
-                    {% endif %}
-                </div>
-
-                <div class="mb-3">
-                    <div class="stat-label">Logout Time</div>
-                    <div class="stat-value">{{ attendance.logout_time|time:"h:i A"|default:"--" }}</div>
-                </div>
-
-                <div class="mb-4">
-                    <div class="stat-label text-danger">Total Break</div>
-                    <div class="timer break" id="breakTimer">00:00:00</div>
-                </div>
-
-                <hr>
-
-                <div>
-                    <div class="stat-label text-primary">Live Working Time</div>
-                    <div class="timer work" id="workTimer">00:00:00</div>
-                </div>
+        <div class="col-md-3">
+            <div class="card field-card accent-login">
+                <span class="field-label">Login Time</span>
+                <div class="field-value">{{ attendance.login_time|time:"h:i A"|default:"--" }}</div>
             </div>
         </div>
-
-
+        <div class="col-md-3">
+            <div class="card field-card accent-logout">
+                <span class="field-label">Office Off Time</span>
+                <div class="field-value" id="offTimeDisplay">--:-- --</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card field-card accent-break">
+                <span class="field-label text-danger">Total Break</span>
+                <div class="field-value timer-font text-break" id="breakTimer">00:00:00</div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card field-card accent-work">
+                <span class="field-label text-primary">Live Work Time</span>
+                <div class="field-value timer-font text-work" id="workTimer">00:00:00</div>
+            </div>
+        </div>
     </div>
 </div>
 
 <script>
-const workTimer = document.getElementById("workTimer");
-const breakTimer = document.getElementById("breakTimer");
-const logoutBtn = document.getElementById("logoutBtn");
+    const OFFICE_OFF_HOUR = 18;
+    const OFFICE_OFF_MIN = 0;
 
-let workSeconds = parseInt(localStorage.getItem("work_seconds")) || {{ working_seconds|default:0 }};
-let breakSeconds = parseInt(localStorage.getItem("break_seconds")) || 0;
+    const logoutBtn = document.getElementById("logoutBtn");
+    const logoutIcon = document.getElementById("logoutIcon");
+    const shiftStatus = document.getElementById("shiftStatus");
+    const offTimeDisplay = document.getElementById("offTimeDisplay");
 
-const breaks = [
-    { name: "morning", start: 11*60+30, end: 11*60+45 },
-    { name: "lunch",   start: 13*60+0,  end: 13*60+30 },
-    { name: "evening", start: 16*60+30, end: 16*60+45 }
-];
+    offTimeDisplay.innerText = `${OFFICE_OFF_HOUR > 12 ? OFFICE_OFF_HOUR-12 : OFFICE_OFF_HOUR}:${OFFICE_OFF_MIN.toString().padStart(2,'0')} ${OFFICE_OFF_HOUR >= 12 ? 'PM' : 'AM'}`;
 
-function format(sec){
-    const h = Math.floor(sec/3600);
-    const m = Math.floor((sec%3600)/60);
-    const s = sec%60;
-    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-}
+    function checkShiftTime() {
+        const now = new Date();
+        const currentHour = now.getHours();
+        const currentMin = now.getMinutes();
 
-function isBreakTime(){
-    const now = new Date();
-    const mins = now.getHours()*60 + now.getMinutes();
-    return breaks.some(b => mins >= b.start && mins < b.end);
-}
+        const isTimeOff = (currentHour > OFFICE_OFF_HOUR) || 
+                          (currentHour === OFFICE_OFF_HOUR && currentMin >= OFFICE_OFF_MIN);
 
-let onBreak = false;
-
-setInterval(() => {
-    const breakNow = isBreakTime();
-
-    if(breakNow && !onBreak){
-        onBreak = true;
-    }
-    if(!breakNow && onBreak){
-        onBreak = false;
+        if (isTimeOff) {
+            logoutBtn.disabled = false;
+            logoutBtn.title = "Shift ended. You can logout.";
+            logoutIcon.classList.replace("bi-lock-fill", "bi-box-arrow-right");
+            shiftStatus.innerText = "Shift complete. Logout available.";
+            shiftStatus.classList.replace("text-muted", "text-success");
+        } else {
+            logoutBtn.disabled = true;
+            shiftStatus.innerText = "Shift in progress. Logout will enable at " + offTimeDisplay.innerText;
+        }
     }
 
-    if(onBreak){
-        breakSeconds++;
-        breakTimer.innerText = format(breakSeconds);
-    } else {
-        workSeconds++;
-        workTimer.innerText = format(workSeconds);
+    checkShiftTime();
+    setInterval(checkShiftTime, 60000);
+
+    const workTimer = document.getElementById("workTimer");
+    const breakTimer = document.getElementById("breakTimer");
+
+    let workSeconds = parseInt(localStorage.getItem("work_seconds")) || {{ working_seconds|default:0 }};
+    let breakSeconds = parseInt(localStorage.getItem("break_seconds")) || {{ attendance.break_time.total_seconds|default:0 }};
+
+    const breaks = [
+        { start: 11*60+30, end: 11*60+45 },
+        { start: 13*60+0,  end: 13*60+30 },
+        { start: 16*60+30, end: 16*60+45 }
+    ];
+
+    function formatTime(sec){
+        const h = Math.floor(sec/3600);
+        const m = Math.floor((sec%3600)/60);
+        const s = sec%60;
+        return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
     }
 
-    localStorage.setItem("work_seconds", workSeconds);
-    localStorage.setItem("break_seconds", breakSeconds);
+    setInterval(() => {
+        const now = new Date();
+        const mins = now.getHours()*60 + now.getMinutes();
+        const onBreak = breaks.some(b => mins >= b.start && mins < b.end);
 
-}, 1000);
+        if(onBreak) {
+            breakSeconds++;
+            breakTimer.innerText = formatTime(breakSeconds);
+        } else {
+            workSeconds++;
+            workTimer.innerText = formatTime(workSeconds);
+        }
 
-// LOGOUT SEND DATA TO SERVER
-logoutBtn.onclick = () => {
-    const form = document.createElement("form");
-    form.method = "POST";
-    form.action = "{% url 'employee_logout' %}";
+        localStorage.setItem("work_seconds", workSeconds);
+        localStorage.setItem("break_seconds", breakSeconds);
+    }, 1000);
 
-    const csrfInput = document.createElement("input");
-    csrfInput.type = "hidden";
-    csrfInput.name = "csrfmiddlewaretoken";
-    csrfInput.value = '{{ csrf_token }}';
-    form.appendChild(csrfInput);
+    logoutBtn.onclick = () => {
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = "{% url 'employee_logout' %}";
 
-    const workInput = document.createElement("input");
-    workInput.type = "hidden";
-    workInput.name = "work_seconds";
-    workInput.value = workSeconds;
-    form.appendChild(workInput);
+        const data = {
+            'csrfmiddlewaretoken': '{{ csrf_token }}',
+            'work_seconds': workSeconds,
+            'break_seconds': breakSeconds
+        };
 
-    const breakInput = document.createElement("input");
-    breakInput.type = "hidden";
-    breakInput.name = "break_seconds";
-    breakInput.value = breakSeconds;
-    form.appendChild(breakInput);
+        for (const [key, value] of Object.entries(data)) {
+            const input = document.createElement("input");
+            input.type = "hidden";
+            input.name = key;
+            input.value = value;
+            form.appendChild(input);
+        }
 
-    document.body.appendChild(form);
-    form.submit();
-};
+        document.body.appendChild(form);
+        form.submit();
+    };
 </script>
-
 </body>
 </html>
