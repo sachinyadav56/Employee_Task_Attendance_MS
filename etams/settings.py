@@ -132,34 +132,49 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 JAZZMIN_SETTINGS = {
+
     "site_title": "ETAMS Admin",
-    "site_header": "Employee Task & Attendance Management",
+    "site_header": "ETAMS Administration",
     "site_brand": "ETAMS",
-    "welcome_sign": "Welcome to ETAMS Admin Panel",
-    "copyright": "ETAMS",
 
-    "search_model": ["auth.User", "core.Employee"],
+    "welcome_sign": "Welcome to ETAMS Control Panel",
 
-    "topmenu_links": [
-        {"name": "Dashboard", "url": "admin:index", "permissions": ["auth.view_user"]},
-    ],
+    # 🔥 Sidebar Settings
+    "show_sidebar": True,
+    "navigation_expanded": True,
+    "sidebar_fixed": True,
 
+    # Top menu removed (clean look)
+    "topmenu_links": [],
+
+    # 🔥 Icons
     "icons": {
         "auth": "fas fa-users-cog",
-        "auth.user": "fas fa-user",
         "core.department": "fas fa-building",
         "core.employee": "fas fa-id-badge",
-        "core.task": "fas fa-tasks",
         "core.attendance": "fas fa-calendar-check",
+        "core.task": "fas fa-tasks",
     },
 
-    "default_icon_parents": "fas fa-chevron-circle-right",
-    "default_icon_children": "fas fa-circle",
+    # Expand all apps
+    "custom_links": {},
 
-    "theme": "flatly",
-    "dark_mode_theme": "darkly",
 }
 
+JAZZMIN_UI_TWEAKS = {
+    "theme": "flatly",      # Try: flatly, cosmo, darkly, minty
+    "dark_mode_theme": "darkly",
+
+    "navbar_small_text": False,
+    "sidebar_small_text": False,
+    "sidebar_nav_small_text": False,
+
+    "sidebar_disable_expand": False,
+    "sidebar_nav_child_indent": True,
+
+    "brand_colour": "navbar-indigo",
+    "accent": "accent-indigo",
+}
 
 USE_TZ = True
 TIME_ZONE = "Asia/Kolkata"

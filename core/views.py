@@ -79,8 +79,8 @@ def employee_login(request):
     return render(request, 'login.html', {'departments': departments})
 
 
-# EMPLOYEE DASHBOARD
-# EMPLOYEE DASHBOARD (FIXED LIVE TIMER)
+
+# EMPLOYEE DASHBOARD 
 @employee_login_required
 def employee_dashboard(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
@@ -102,27 +102,35 @@ def employee_dashboard(request):
         now = timezone.localtime(timezone.now())
         dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
 
-        # Late logic
+        # ✅ Late logic (HH:MM:SS already correct)
         office_start = timezone.make_aware(datetime.combine(date.today(), time(10, 15)), tz)
         if dt_login > office_start:
             late_seconds = int((dt_login - office_start).total_seconds())
-            late_display = f"{late_seconds // 60} min"
-            status = "Late"
+            h = late_seconds // 3600
+            m = (late_seconds % 3600) // 60
+            s = late_seconds % 60
+            late_display = f"{h:02d}:{m:02d}:{s:02d}"
+            status = "Late/Present"
         else:
             status = "Present"
 
-        # 🔹 Fixed breaks (add AFTER break end)
+        # ✅ Fixed breaks (only if login before break)
         breaks = [
-            ("break1_added", time(11, 30), 15 * 60),
-            ("break2_added", time(13, 30), 30 * 60),
-            ("break3_added", time(16, 30), 15 * 60),
+            ("break1_added", time(11, 15), 15 * 60),
+            ("break2_added", time(13, 0), 30 * 60),
+            ("break3_added", time(16, 15), 15 * 60),
         ]
 
         total_break_seconds = int(attendance.break_time.total_seconds()) if attendance.break_time else 0
 
-        for flag, break_end, sec in breaks:
-            break_end_dt = timezone.make_aware(datetime.combine(date.today(), break_end), tz)
-            if now >= break_end_dt and not getattr(attendance, flag):
+        for flag, break_time, sec in breaks:
+            break_dt = timezone.make_aware(datetime.combine(date.today(), break_time), tz)
+
+            # ✅ add break only if:
+            # 1. user logged in before this break
+            # 2. current time is after break time
+            # 3. break not already added
+            if dt_login <= break_dt and now >= break_dt and not getattr(attendance, flag):
                 total_break_seconds += sec
                 setattr(attendance, flag, True)
 
@@ -131,7 +139,7 @@ def employee_dashboard(request):
 
         break_seconds = total_break_seconds
 
-        # 🔹 Live working time (continuous)
+        # ✅ Live working time (keeps running across refresh)
         if now > dt_login:
             working_seconds = int((now - dt_login).total_seconds())
         else:
@@ -146,6 +154,7 @@ def employee_dashboard(request):
         'late_display': late_display,
         'status': status
     })
+
 
 # UPDATE TASK STATUS
 @employee_login_required
