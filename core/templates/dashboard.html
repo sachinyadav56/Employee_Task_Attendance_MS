@@ -2,102 +2,291 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Employee Dashboard | ETAMS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
+    <title>ETAMS | Portal</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         :root {
-            --bg-body: #f4f7fa;
-            --slate-900: #0f172a;
-            --indigo-600: #4f46e5;
-            --rose-600: #e11d48;
-            --shadow-md: 0 10px 15px -3px rgba(0,0,0,0.1);
+            --bg-canvas: #f8fafc;
+            --sidebar-bg: #ffffff;
+            --accent-primary: #4f46e5; /* Modern Indigo */
+            --border-subtle: #e2e8f0;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --danger: #ef4444;
+            --success: #10b981;
         }
-        body { background-color: var(--bg-body); font-family: 'Inter', system-ui, sans-serif; color: var(--slate-900); }
-        .navbar { background: var(--slate-900); padding: 1rem 1.5rem; }
-        .card { border: none; border-radius: 12px; box-shadow: var(--shadow-md); background: #ffffff; overflow: hidden; height: 100%; }
-        .field-card { padding: 1.5rem; display: flex; flex-direction: column; }
-        .accent-login { border-top: 5px solid #64748b; }
-        .accent-break { border-top: 5px solid var(--rose-600); }
-        .accent-work { border-top: 5px solid var(--indigo-600); }
-        .field-label { font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: #64748b; margin-bottom: 0.75rem; }
-        .field-value { font-size: 1.7rem; font-weight: 700; white-space: nowrap; }
-        .timer-font { font-family: 'Courier New', monospace; }
-        .text-break { color: var(--rose-600); }
-        .text-work { color: var(--indigo-600); }
-        #logoutBtn { background: rgba(225, 29, 72, 0.1); color: var(--rose-600); border: 1px solid var(--rose-600); }
-        #logoutBtn:hover { background: var(--rose-600); color: white; }
+
+        body {
+            background-color: var(--bg-canvas);
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        /* --- Sidebar Enhancements --- */
+        .sidebar {
+            width: 240px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border-subtle);
+            display: flex;
+            flex-direction: column;
+            padding: 32px 20px;
+            box-shadow: 4px 0 24px rgba(0,0,0,0.02);
+            z-index: 10;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--accent-primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 48px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu { flex-grow: 1; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 16px;
+            color: var(--text-muted);
+            text-decoration: none;
+            border-radius: 8px;
+            margin-bottom: 6px;
+            transition: all 0.2s ease;
+            font-weight: 500;
+        }
+
+        .nav-item:hover {
+            background: #f1f5f9;
+            color: var(--accent-primary);
+        }
+
+        .nav-item.active {
+            background: var(--accent-primary);
+            color: #ffffff;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
+        }
+
+        /* --- Content Area --- */
+        .content-area {
+            flex-grow: 1;
+            padding: 48px 64px;
+            overflow-y: auto;
+        }
+
+        .section-header {
+            margin-bottom: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        /* --- Info Container/Card --- */
+        .info-container {
+            background: #ffffff;
+            border: 1px solid var(--border-subtle);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+        }
+
+        .info-header {
+            background: #fdfdfd;
+            padding: 24px 32px;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            gap: 64px;
+        }
+
+        .info-cell {
+            padding: 32px;
+            transition: background 0.2s;
+        }
+
+        .metric-label {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 10px;
+        }
+
+        .metric-value {
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-main);
+        }
+
+        /* --- Timers --- */
+        .timer-box {
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            font-size: 32px;
+            font-weight: 700;
+            letter-spacing: -1px;
+        }
+
+        .text-primary { color: var(--accent-primary) !important; }
+
+        /* --- Status Indicator --- */
+        .status-dot {
+            height: 10px;
+            width: 10px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 8px;
+            position: relative;
+        }
+        
+        /* Pulse Animation */
+        .status-dot::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(2.5); opacity: 0; }
+        }
+
+        .logout-link {
+            border-top: 1px solid var(--border-subtle);
+            padding: 20px 16px 0;
+            color: var(--danger);
+            font-weight: 600;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: opacity 0.2s;
+        }
+
+        .logout-link:hover { opacity: 0.7; color: var(--danger); }
+
+        .border-end { border-color: var(--border-subtle) !important; }
+        .border-bottom { border-color: var(--border-subtle) !important; }
     </style>
 </head>
-
 <body>
 
-<nav class="navbar navbar-dark mb-4">
-    <div class="container-fluid">
-        <span class="navbar-brand fw-bold">
-            <i class="bi bi-cpu-fill text-info me-2"></i> ETAMS
-        </span>
-        <div class="d-flex gap-2">
-            <a href="{% url 'attendance_report' %}" class="btn btn-sm btn-outline-light px-3">
-                <i class="bi bi-calendar-check me-1"></i> Attendance
-            </a>
-            <a href="{% url 'assigned_tasks' %}" class="btn btn-sm btn-outline-light px-3">
-                <i class="bi bi-list-task me-1"></i> Tasks
-            </a>
-            <button id="logoutBtn" class="btn btn-sm px-3">
-                <i class="bi bi-box-arrow-right me-1"></i> Logout
-            </button>
+<aside class="sidebar">
+    <div class="brand">
+        <i class="bi bi-hexagon-fill"></i> ETAMS
+    </div>
+
+    <nav class="nav-menu">
+        <a href="#" class="nav-item active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+        <a href="{% url 'attendance_report' %}" class="nav-item"><i class="bi bi-calendar-event"></i> Attendance</a>
+        <a href="{% url 'assigned_tasks' %}" class="nav-item"><i class="bi bi-check2-square"></i> My Tasks</a>
+    </nav>
+
+    <a href="javascript:void(0)" id="logoutTrigger" class="logout-link">
+        <i class="bi bi-box-arrow-left"></i> Logout
+    </a>
+</aside>
+
+<main class="content-area">
+    <div class="section-header">
+        <div>
+            <div class="section-title">Employee Dashboard</div>
+            <div class="text-muted d-flex align-items-center gap-2">
+                <i class="bi bi-person-circle"></i>
+                <span>ID: <span class="text-dark fw-bold">{{ employee.employee_id }}</span></span>
+            </div>
+        </div>
+        <div class="badge bg-light text-dark border p-2 px-3 rounded-pill d-flex align-items-center">
+            <span class="status-dot"></span> <span class="small fw-semibold">Active Session</span>
         </div>
     </div>
-</nav>
 
-<div class="container">
-
-    <div class="card p-4 mb-4 border-start border-info border-5">
-        <h4 class="fw-bold mb-1">Employee ID: {{ employee.employee_id }}</h4>
-        <h4 class="fw-bold mb-1">Department: {{ employee.department.name }}</h4>
-        <h4 class="fw-bold mb-1">Role: {{ employee.role }}</h4>
-    </div>
-
-    <div class="row g-4">
-
-        <div class="col-md-3">
-            <div class="card field-card accent-login">
-                <span class="field-label">Login Time</span>
-                <div class="field-value">
-                    {{ attendance.login_time|time:"h:i A"|default:"--" }}
+    <div class="info-container">
+        <div class="info-header">
+            <div>
+                <div class="metric-label">Department</div>
+                <div class="metric-value">
+                    <i class="bi bi-building text-muted"></i> {{ employee.department.name }}
+                </div>
+            </div>
+            <div>
+                <div class="metric-label">Designation</div>
+                <div class="metric-value">
+                    <i class="bi bi-person-badge text-muted"></i> {{ employee.role }}
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card field-card">
-                <span class="field-label">Late Time</span>
-                <div class="field-value text-danger">
-                    {% if late_display %}{{ late_display }}{% else %}00 min{% endif %}
+        <div class="row g-0 border-bottom">
+            <div class="col-md-6 border-end">
+                <div class="info-cell">
+                    <div class="metric-label">Shift Start</div>
+                    <div class="metric-value">
+                        <i class="bi bi-clock-history text-primary"></i>
+                        {{ attendance.login_time|time:"h:i A"|default:"--" }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="info-cell">
+                    <div class="metric-label text-danger">Delay Log</div>
+                    <div class="metric-value text-danger">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        {% if late_display %}{{ late_display }}{% else %}00 min{% endif %}
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-3">
-            <div class="card field-card accent-break">
-                <span class="field-label text-danger">Total Break</span>
-                <div class="field-value timer-font text-break" id="breakTimer">00:00:00</div>
+        <div class="row g-0">
+            <div class="col-md-6 border-end">
+                <div class="info-cell">
+                    <div class="metric-label text-primary">Working Time (Live)</div>
+                    <div class="timer-box text-primary" id="workTimer">00:00:00</div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="info-cell">
+                    <div class="metric-label">Total Break Time</div>
+                    <div class="timer-box text-muted" id="breakTimer">00:00:00</div>
+                </div>
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="card field-card accent-work">
-                <span class="field-label text-primary">Live Work Time</span>
-                <div class="field-value timer-font text-work" id="workTimer">00:00:00</div>
-            </div>
-        </div>
-
     </div>
-</div>
+
+    <div class="mt-4 p-3 bg-white rounded-3 small text-muted border d-inline-flex align-items-center">
+        <i class="bi bi-info-circle-fill text-primary me-2"></i>
+        Session is being recorded. Please remember to log out before leaving.
+    </div>
+</main>
 
 <script>
     const workTimer = document.getElementById("workTimer");
@@ -115,14 +304,13 @@
 
     workTimer.innerText = formatTime(workSeconds);
     breakTimer.innerText = formatTime(breakSeconds);
-    
-    // Live work timer only
+
     setInterval(() => {
         workSeconds++;
         workTimer.innerText = formatTime(workSeconds);
     }, 1000);
 
-    document.getElementById("logoutBtn").onclick = () => {
+    document.getElementById("logoutTrigger").onclick = () => {
         const form = document.createElement("form");
         form.method = "POST";
         form.action = "{% url 'employee_logout' %}";
