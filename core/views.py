@@ -3,34 +3,31 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import datetime, timedelta, date, time
 
-from .models import Employee, Task, Attendance, Department
+from .models import Employee, Task, Attendance, Department, Role
 from .forms import EmployeeForm, TaskForm
 from .decorators import employee_login_required
 from django.http import JsonResponse
-from .models import Role
 
 
-# EMPLOYEE LOGIN
 # EMPLOYEE LOGIN
 def employee_login(request):
-    # Handle AJAX request to fetch roles for a department
+    # AJAX: fetch roles by department
     if request.method == 'GET' and request.GET.get('dept_id'):
         dept_id = request.GET.get('dept_id')
         roles = Role.objects.filter(department_id=dept_id).values('id', 'name')
         return JsonResponse(list(roles), safe=False)
 
-    # Handle login form submission
     if request.method == 'POST':
         emp_id = request.POST.get('employee_id', '').strip()
         department_id = request.POST.get('department')
-        role_id = request.POST.get('role')
+        # role_id = request.POST.get('role')
         password = request.POST.get('password', '').strip()
 
         try:
             employee = Employee.objects.get(
                 employee_id=emp_id,
                 department_id=department_id,
-                role_id=role_id,
+                # role_id=role_id,
                 is_active=True
             )
         except Employee.DoesNotExist:
@@ -41,13 +38,10 @@ def employee_login(request):
             messages.error(request, "Invalid password")
             return redirect('employee_login')
 
-        # Set session
         request.session['employee_id'] = employee.id
 
-        # Attendance logic
         now = timezone.localtime(timezone.now())
         login_time = now.time()
-        SHIFT_START = time(10, 0)
         GRACE_TIME = time(10, 15)
 
         if login_time <= GRACE_TIME:
@@ -81,11 +75,12 @@ def employee_login(request):
         messages.success(request, "Login successful")
         return redirect('employee_dashboard')
 
-    # GET request to render login page
     departments = Department.objects.all()
     return render(request, 'login.html', {'departments': departments})
 
+
 # EMPLOYEE DASHBOARD
+# EMPLOYEE DASHBOARD (FIXED LIVE TIMER)
 @employee_login_required
 def employee_dashboard(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
@@ -97,39 +92,60 @@ def employee_dashboard(request):
 
     tasks = Task.objects.filter(employee=employee).order_by('-assigned_date')
 
-    # Live work timer calculation
     working_seconds = 0
+    break_seconds = 0
     late_display = None
+    status = "Present"
 
     if attendance and attendance.login_time:
         tz = timezone.get_current_timezone()
         now = timezone.localtime(timezone.now())
         dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
 
-        # Include already saved net working hours from previous breaks
-        prev_work_seconds = int(attendance.net_working_hours.total_seconds()) if attendance.net_working_hours else 0
-
-        if now > dt_login:
-            working_seconds = int((now - dt_login).total_seconds()) + prev_work_seconds
-        else:
-            working_seconds = prev_work_seconds
-
-        # Late calculation
+        # Late logic
         office_start = timezone.make_aware(datetime.combine(date.today(), time(10, 15)), tz)
         if dt_login > office_start:
             late_seconds = int((dt_login - office_start).total_seconds())
-            late_hours = late_seconds // 3600
-            late_minutes = (late_seconds % 3600) // 60
-            late_display = f"{late_hours} hr {late_minutes} min" if late_hours > 0 else f"{late_minutes} min"
+            late_display = f"{late_seconds // 60} min"
+            status = "Late"
+        else:
+            status = "Present"
+
+        # 🔹 Fixed breaks (add AFTER break end)
+        breaks = [
+            ("break1_added", time(11, 30), 15 * 60),
+            ("break2_added", time(13, 30), 30 * 60),
+            ("break3_added", time(16, 30), 15 * 60),
+        ]
+
+        total_break_seconds = int(attendance.break_time.total_seconds()) if attendance.break_time else 0
+
+        for flag, break_end, sec in breaks:
+            break_end_dt = timezone.make_aware(datetime.combine(date.today(), break_end), tz)
+            if now >= break_end_dt and not getattr(attendance, flag):
+                total_break_seconds += sec
+                setattr(attendance, flag, True)
+
+        attendance.break_time = timedelta(seconds=total_break_seconds)
+        attendance.save(update_fields=["break_time", "break1_added", "break2_added", "break3_added"])
+
+        break_seconds = total_break_seconds
+
+        # 🔹 Live working time (continuous)
+        if now > dt_login:
+            working_seconds = int((now - dt_login).total_seconds())
+        else:
+            working_seconds = 0
 
     return render(request, 'dashboard.html', {
         'employee': employee,
         'attendance': attendance,
         'tasks': tasks,
         'working_seconds': working_seconds,
+        'break_seconds': break_seconds,
         'late_display': late_display,
+        'status': status
     })
-
 
 # UPDATE TASK STATUS
 @employee_login_required
@@ -146,10 +162,7 @@ def update_task_status(request, task_id):
 def assign_task(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
     tasks = Task.objects.filter(employee=employee).order_by('-assigned_date')
-    return render(request, 'assign_task.html', {
-        'tasks': tasks,
-        'employee': employee
-    })
+    return render(request, 'assign_task.html', {'tasks': tasks, 'employee': employee})
 
 
 def format_td(td):
@@ -171,7 +184,6 @@ def employee_logout(request):
         messages.error(request, "Attendance not found for today.")
         return redirect('employee_dashboard')
 
-    # Get current time as logout
     now = timezone.localtime(timezone.now())
     logout_time = now.time()
 
@@ -179,29 +191,21 @@ def employee_logout(request):
     dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
     dt_logout = timezone.make_aware(datetime.combine(date.today(), logout_time), tz)
 
-    # Cap at shift end 17:00
-    SHIFT_END = timezone.make_aware(datetime.combine(date.today(), time(17, 0)), tz)
-    if dt_logout > SHIFT_END:
-        dt_logout = SHIFT_END
-
     gross_work = dt_logout - dt_login
 
-    # Get work_seconds & break_seconds from POST
     try:
         work_seconds = int(request.POST.get("work_seconds", 0))
         break_seconds = int(request.POST.get("break_seconds", 0))
-    except ValueError:
-        work_seconds = int((gross_work.total_seconds()))
+    except:
+        work_seconds = int(gross_work.total_seconds())
         break_seconds = 0
 
     real_break = timedelta(seconds=break_seconds)
     net_work = timedelta(seconds=work_seconds)
 
-    # Ensure net_work is at least zero
     if net_work < timedelta():
         net_work = timedelta()
 
-    # Save attendance
     attendance.logout_time = dt_logout.time()
     attendance.total_hours = gross_work
     attendance.break_time = real_break
@@ -209,10 +213,10 @@ def employee_logout(request):
     attendance.status = 'Late' if attendance.late_by and attendance.late_by > timedelta() else 'Present'
     attendance.save()
 
-    # Clear session and localStorage on frontend handled automatically
     request.session.flush()
     messages.success(request, "Logout successful. Have a great day!")
     return redirect('employee_login')
+
 
 # ADD EMPLOYEE
 def add_employee(request):
@@ -243,7 +247,7 @@ def attendance_report(request):
     return render(request, 'attendance_report.html', {'records': records})
 
 
-
+# AJAX: Get roles by department
 def get_roles(request):
     department_id = request.GET.get('department_id')
     roles = Role.objects.filter(department_id=department_id).values('id', 'name')

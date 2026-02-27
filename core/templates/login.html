@@ -122,12 +122,12 @@
                 <label>Department</label>
             </div>
 
-            <div class="form-floating mb-3">
+            {% comment %} <div class="form-floating mb-3">
                 <select name="role" id="roleSelect" class="form-select" required>
                     <option value="">Select Role</option>
                 </select>
                 <label>Role</label>
-            </div>
+            </div> {% endcomment %}
 
             <div class="form-floating mb-3">
                 <input type="password" name="password" class="form-control" placeholder="Password" required>
@@ -153,7 +153,7 @@
         const deptId = this.value;
         roleSelect.innerHTML = '<option value="">Loading roles...</option>';
 
-        fetch(`/get-roles/?department_id=${deptId}`)
+        {% comment %} fetch(`/get-roles/?department_id=${deptId}`) {% endcomment %}
             .then(res => res.json())
             .then(data => {
                 roleSelect.innerHTML = '<option value="">Select Role</option>';

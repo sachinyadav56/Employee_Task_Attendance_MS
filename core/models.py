@@ -8,19 +8,16 @@ ROLE_CHOICES = (
     ('EMPLOYEE', 'Employee'),
 )
 
-# ------------------------
 # Department Model
-# ------------------------
+
 class Department(models.Model):
     name = models.CharField(max_length=100, unique=True)
 
     def __str__(self):
         return self.name
 
-
-# ------------------------
 # Role Model (Department-wise)
-# ------------------------
+
 class Role(models.Model):
     name = models.CharField(max_length=100)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='roles')
@@ -29,9 +26,9 @@ class Role(models.Model):
         return f"{self.name} ({self.department.name})"
 
 
-# ------------------------
+
 # Employee Model
-# ------------------------
+
 class Employee(models.Model):
     employee_id = models.CharField(max_length=20, unique=True)
     department = models.ForeignKey(Department, on_delete=models.SET_NULL, null=True, blank=True)
@@ -54,9 +51,8 @@ class Employee(models.Model):
         return self.employee_id
 
 
-# ------------------------
 # Task Model
-# ------------------------
+
 class Task(models.Model):
     employee = models.ForeignKey(
         Employee,
@@ -72,9 +68,8 @@ class Task(models.Model):
         return self.title
 
 
-# ------------------------
 # Attendance Model
-# ------------------------
+
 class Attendance(models.Model):
     employee = models.ForeignKey(
         Employee,
@@ -92,6 +87,11 @@ class Attendance(models.Model):
 
     # Late calculation
     late_by = models.DurationField(null=True, blank=True)
+
+    # ✅ Track fixed breaks (so they are added only once)
+    break1_added = models.BooleanField(default=False)  # 11:15 – 11:30
+    break2_added = models.BooleanField(default=False)  # 1:00 – 1:30
+    break3_added = models.BooleanField(default=False)  # 4:15 – 4:30
 
     STATUS_CHOICES = [
         ('Present', 'Present'),
