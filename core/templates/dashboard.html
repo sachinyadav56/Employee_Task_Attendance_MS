@@ -24,7 +24,8 @@
         body {
             background-color: var(--bg-canvas);
             font-family: 'Inter', sans-serif;
-            font-size: 14px;
+            /* REDUCED FONT SIZE HERE */
+            font-size: 13px;
             color: var(--text-main);
             margin: 0;
             display: flex;
@@ -45,7 +46,7 @@
 
         .brand {
             font-weight: 700;
-            font-size: 20px;
+            font-size: 18px; /* Adjusted to scale */
             color: var(--accent-primary);
             letter-spacing: -0.5px;
             margin-bottom: 48px;
@@ -60,11 +61,11 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 10px 16px;
+            padding: 8px 14px; /* Slightly reduced padding */
             color: var(--text-muted);
             text-decoration: none;
             border-radius: 8px;
-            margin-bottom: 6px;
+            margin-bottom: 4px;
             transition: all 0.2s ease;
             font-weight: 500;
         }
@@ -83,22 +84,22 @@
         /* --- Content Area --- */
         .content-area {
             flex-grow: 1;
-            padding: 48px 64px;
+            padding: 32px 48px; /* Reduced padding */
             overflow-y: auto;
         }
 
         .section-header {
-            margin-bottom: 40px;
+            margin-bottom: 32px; /* Reduced margin */
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
         }
 
         .section-title {
-            font-size: 24px;
+            font-size: 20px; /* Adjusted to scale */
             font-weight: 700;
             color: #0f172a;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         /* --- Info Container/Card --- */
@@ -112,28 +113,28 @@
 
         .info-header {
             background: #fdfdfd;
-            padding: 24px 32px;
+            padding: 20px 24px; /* Reduced padding */
             border-bottom: 1px solid var(--border-subtle);
             display: flex;
-            gap: 64px;
+            gap: 48px; /* Reduced gap */
         }
 
         .info-cell {
-            padding: 32px;
+            padding: 24px; /* Reduced padding */
             transition: background 0.2s;
         }
 
         .metric-label {
-            font-size: 11px;
+            font-size: 10px; /* Adjusted to scale */
             font-weight: 700;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .metric-value {
-            font-size: 16px;
+            font-size: 14px; /* Adjusted to scale */
             font-weight: 600;
             display: flex;
             align-items: center;
@@ -144,7 +145,7 @@
         /* --- Timers --- */
         .timer-box {
             font-family: 'JetBrains Mono', 'Courier New', monospace;
-            font-size: 32px;
+            font-size: 28px; /* Adjusted to scale */
             font-weight: 700;
             letter-spacing: -1px;
         }
@@ -153,8 +154,8 @@
 
         /* --- Status Indicator --- */
         .status-dot {
-            height: 10px;
-            width: 10px;
+            height: 9px; /* Slightly reduced */
+            width: 9px;
             background-color: var(--success);
             border-radius: 50%;
             display: inline-block;
@@ -180,7 +181,7 @@
 
         .logout-link {
             border-top: 1px solid var(--border-subtle);
-            padding: 20px 16px 0;
+            padding: 16px 16px 0; /* Reduced padding */
             color: var(--danger);
             font-weight: 600;
             text-decoration: none;
@@ -291,9 +292,14 @@
 <script>
     const workTimer = document.getElementById("workTimer");
     const breakTimer = document.getElementById("breakTimer");
+    const logoutBtn = document.getElementById("logoutTrigger");
 
     let workSeconds = {{ working_seconds|default:0 }};
     let breakSeconds = {{ break_seconds|default:0 }};
+
+    // 🕔 Office end time (5:00 PM)
+    const OFFICE_END_HOUR = 17;
+    const OFFICE_END_MIN = 0;
 
     function formatTime(sec) {
         const h = Math.floor(sec / 3600);
@@ -302,15 +308,48 @@
         return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
     }
 
+    function updateLogoutButton() {
+        const now = new Date();
+        const isOfficeEnded =
+            now.getHours() > OFFICE_END_HOUR ||
+            (now.getHours() === OFFICE_END_HOUR && now.getMinutes() >= OFFICE_END_MIN);
+
+        if (isOfficeEnded) {
+            logoutBtn.style.pointerEvents = "auto";
+            logoutBtn.style.opacity = "1";
+            logoutBtn.title = "You can logout now";
+        } else {
+            logoutBtn.style.pointerEvents = "none";
+            logoutBtn.style.opacity = "0.5";
+            logoutBtn.title = "Logout available after 5:00 PM";
+        }
+    }
+
     workTimer.innerText = formatTime(workSeconds);
     breakTimer.innerText = formatTime(breakSeconds);
 
+    // ⏱ Live work timer
     setInterval(() => {
         workSeconds++;
         workTimer.innerText = formatTime(workSeconds);
+        updateLogoutButton();  // re-check every second
     }, 1000);
 
-    document.getElementById("logoutTrigger").onclick = () => {
+    // 🔁 Initial check on page load
+    updateLogoutButton();
+
+    logoutBtn.onclick = () => {
+        const now = new Date();
+
+        // 🛑 Extra frontend safety
+        if (
+            now.getHours() < OFFICE_END_HOUR ||
+            (now.getHours() === OFFICE_END_HOUR && now.getMinutes() < OFFICE_END_MIN)
+        ) {
+            alert("You can logout only after 5:00 PM.");
+            return;
+        }
+
         const form = document.createElement("form");
         form.method = "POST";
         form.action = "{% url 'employee_logout' %}";

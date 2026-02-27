@@ -183,9 +183,17 @@ def employee_logout(request):
     if not attendance or not attendance.login_time:
         messages.error(request, "Attendance not found for today.")
         return redirect('employee_dashboard')
+    
+    
 
     now = timezone.localtime(timezone.now())
     logout_time = now.time()
+    
+     # ✅ ADD THIS: block logout before 5:00 PM
+    OFFICE_END = time(17, 0)  # 5:00 PM
+    if logout_time < OFFICE_END:
+        messages.error(request, "You can logout only after 5:00 PM.")
+        return redirect('employee_dashboard')
 
     tz = timezone.get_current_timezone()
     dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
