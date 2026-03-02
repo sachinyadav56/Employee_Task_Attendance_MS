@@ -11,23 +11,30 @@ from django.http import JsonResponse
 
 # EMPLOYEE LOGIN
 def employee_login(request):
-    # AJAX: fetch roles by department
+    # ✅ Weekend OFF check (Saturday=5, Sunday=6)
+    today = timezone.localdate()
+    is_weekend_off = today.weekday() in (5, 6)  # Sat, Sun
+
+    # AJAX: fetch roles by department (keep as is)
     if request.method == 'GET' and request.GET.get('dept_id'):
         dept_id = request.GET.get('dept_id')
         roles = Role.objects.filter(department_id=dept_id).values('id', 'name')
         return JsonResponse(list(roles), safe=False)
 
     if request.method == 'POST':
+        # ✅ Block login on Saturday/Sunday
+        if is_weekend_off:
+            messages.error(request, "Today is off (Saturday/Sunday). Login is disabled.")
+            return redirect('employee_login')
+
         emp_id = request.POST.get('employee_id', '').strip()
         department_id = request.POST.get('department')
-        # role_id = request.POST.get('role')
         password = request.POST.get('password', '').strip()
 
         try:
             employee = Employee.objects.get(
                 employee_id=emp_id,
                 department_id=department_id,
-                # role_id=role_id,
                 is_active=True
             )
         except Employee.DoesNotExist:
@@ -76,7 +83,13 @@ def employee_login(request):
         return redirect('employee_dashboard')
 
     departments = Department.objects.all()
-    return render(request, 'login.html', {'departments': departments})
+
+    # ✅ Pass flag + day name to template for banner
+    return render(request, 'login.html', {
+        'departments': departments,
+        'is_weekend_off': is_weekend_off,
+        'today_name': today.strftime("%A"),
+    })
 
 
 
