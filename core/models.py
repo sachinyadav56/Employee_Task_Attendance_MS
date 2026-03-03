@@ -93,7 +93,6 @@ class Attendance(models.Model):
 
     STATUS_CHOICES = [
         ('Present', 'Present'),
-        ('Present', 'Present'),
         ('Absent', 'Absent'),
     ]
     status = models.CharField(
