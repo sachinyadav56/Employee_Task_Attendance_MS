@@ -55,10 +55,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'etams.urls'
 
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,50 +132,71 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+
+
 JAZZMIN_SETTINGS = {
-
     "site_title": "ETAMS Admin",
-    "site_header": "ETAMS Administration",
-    "site_brand": "ETAMS",
+    "site_header": "ETAMS",
+    "site_brand": "ETAMS Admin",
+    "welcome_sign": "Welcome to ETAMS Admin Panel",
+    "copyright": "ETAMS",
 
-    "welcome_sign": "Welcome to ETAMS Control Panel",
-
-    # 🔥 Sidebar Settings
     "show_sidebar": True,
     "navigation_expanded": True,
-    "sidebar_fixed": True,
 
-    # Top menu removed (clean look)
-    "topmenu_links": [],
+    # Side menu ordering (apps/models) :contentReference[oaicite:3]{index=3}
+    "order_with_respect_to": [
+        "core",
+        "core.Employee",
+        "core.Department",
+        "core.Attendance",
+        "core.Task",
+        "auth",
+    ],
 
-    # 🔥 Icons
-    "icons": {
-        "auth": "fas fa-users-cog",
-        "core.department": "fas fa-building",
-        "core.employee": "fas fa-id-badge",
-        "core.attendance": "fas fa-calendar-check",
-        "core.task": "fas fa-tasks",
+    # “Grouping” feel using custom links under core app :contentReference[oaicite:4]{index=4}
+    "custom_links": {
+        "core": [
+            {
+                "name": "HR • Employees",
+                "url": "/admin/core/employee/",
+                "icon": "fas fa-user-tie",
+            },
+            {
+                "name": "HR • Departments",
+                "url": "/admin/core/department/",
+                "icon": "fas fa-building",
+            },
+            {
+                "name": "Attendance • Logs",
+                "url": "/admin/core/attendance/",
+                "icon": "fas fa-calendar-check",
+            },
+            {
+                "name": "Tasks • All Tasks",
+                "url": "/admin/core/task/",
+                "icon": "fas fa-tasks",
+            },
+        ]
     },
 
-    # Expand all apps
-    "custom_links": {},
+    "icons": {
+        "core": "fas fa-layer-group",
+        "core.Department": "fas fa-building",
+        "core.Employee": "fas fa-user-tie",
+        "core.Attendance": "fas fa-calendar-check",
+        "core.Task": "fas fa-tasks",
 
+        "auth": "fas fa-users-cog",
+        "auth.user": "fas fa-user",
+        "auth.Group": "fas fa-users",
+    },
+
+    "show_ui_builder": True,
 }
 
 JAZZMIN_UI_TWEAKS = {
-    "theme": "flatly",      # Try: flatly, cosmo, darkly, minty
-    "dark_mode_theme": "darkly",
-
-    "navbar_small_text": False,
-    "sidebar_small_text": False,
-    "sidebar_nav_small_text": False,
-
-    "sidebar_disable_expand": False,
-    "sidebar_nav_child_indent": True,
-
-    "brand_colour": "navbar-indigo",
-    "accent": "accent-indigo",
+    "theme": "darkly",
 }
-
 USE_TZ = True
 TIME_ZONE = "Asia/Kolkata"
