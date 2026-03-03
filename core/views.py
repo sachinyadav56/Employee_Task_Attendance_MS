@@ -51,14 +51,15 @@ def employee_login(request):
         login_time = now.time()
         GRACE_TIME = time(10, 15)
 
+        # ✅ CHANGE: status always Present if logged in
         if login_time <= GRACE_TIME:
-            status = 'Present'
             late_by = timedelta()
         else:
-            status = 'Late'
             dt_login = datetime.combine(date.today(), login_time)
             dt_grace = datetime.combine(date.today(), GRACE_TIME)
             late_by = dt_login - dt_grace
+
+        status = "Present"
 
         attendance, created = Attendance.objects.get_or_create(
             employee=employee,
@@ -92,8 +93,7 @@ def employee_login(request):
     })
 
 
-
-# EMPLOYEE DASHBOARD 
+# EMPLOYEE DASHBOARD
 @employee_login_required
 def employee_dashboard(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
@@ -123,7 +123,7 @@ def employee_dashboard(request):
             m = (late_seconds % 3600) // 60
             s = late_seconds % 60
             late_display = f"{h:02d}:{m:02d}:{s:02d}"
-            status = "Late/Present"
+            status = "Present"
         else:
             status = "Present"
 
@@ -139,10 +139,6 @@ def employee_dashboard(request):
         for flag, break_time, sec in breaks:
             break_dt = timezone.make_aware(datetime.combine(date.today(), break_time), tz)
 
-            # ✅ add break only if:
-            # 1. user logged in before this break
-            # 2. current time is after break time
-            # 3. break not already added
             if dt_login <= break_dt and now >= break_dt and not getattr(attendance, flag):
                 total_break_seconds += sec
                 setattr(attendance, flag, True)
@@ -152,7 +148,6 @@ def employee_dashboard(request):
 
         break_seconds = total_break_seconds
 
-        # ✅ Live working time (keeps running across refresh)
         if now > dt_login:
             working_seconds = int((now - dt_login).total_seconds())
         else:
@@ -205,13 +200,10 @@ def employee_logout(request):
     if not attendance or not attendance.login_time:
         messages.error(request, "Attendance not found for today.")
         return redirect('employee_dashboard')
-    
-    
 
     now = timezone.localtime(timezone.now())
     logout_time = now.time()
-    
-     # ✅ ADD THIS: block logout before 5:00 PM
+
     OFFICE_END = time(17, 0)  # 5:00 PM
     if logout_time < OFFICE_END:
         messages.error(request, "You can logout only after 5:00 PM.")
@@ -240,7 +232,10 @@ def employee_logout(request):
     attendance.total_hours = gross_work
     attendance.break_time = real_break
     attendance.net_working_hours = net_work
-    attendance.status = 'Late' if attendance.late_by and attendance.late_by > timedelta() else 'Present'
+
+    # ✅ CHANGE: never mark Late on logout
+    attendance.status = "Present"
+
     attendance.save()
 
     request.session.flush()
