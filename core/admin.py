@@ -104,3 +104,23 @@ class AttendanceAdmin(admin.ModelAdmin):
             return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
         return "00:00:00"
     formatted_net_work.short_description = "Net Working"
+
+from django.utils import timezone
+from django.contrib.admin.sites import AdminSite
+from .models import Employee, Attendance, Task
+
+_old_each_context = AdminSite.each_context
+
+def _new_each_context(self, request):
+    ctx = _old_each_context(self, request)
+    today = timezone.localdate()
+    
+    ctx["today_date"] = today.isoformat()
+    ctx["card_total_employees"] = Employee.objects.filter(is_active=True).count()
+    ctx["card_present_today"] = Attendance.objects.filter(date=today, status="Present").count()
+    ctx["card_tasks_completed_today"] = Task.objects.filter(
+        assigned_date=today, is_completed=True
+    ).count()
+    return ctx
+
+AdminSite.each_context = _new_each_context
