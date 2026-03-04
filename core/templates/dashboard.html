@@ -1,376 +1,409 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>ETAMS | Portal</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ETAMS | Portal</title>
 
-    <style>
-        :root {
-            --bg-canvas: #f8fafc;
-            --sidebar-bg: #ffffff;
-            --accent-primary: #4f46e5; /* Modern Indigo */
-            --border-subtle: #e2e8f0;
-            --text-main: #1e293b;
-            --text-muted: #64748b;
-            --danger: #ef4444;
-            --success: #10b981;
-        }
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
-        body {
-            background-color: var(--bg-canvas);
-            font-family: 'Inter', sans-serif;
-            /* REDUCED FONT SIZE HERE */
-            font-size: 13px;
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            height: 100vh;
-        }
+  <style>
+    :root{
+      --bg-canvas:#f8fafc;
+      --sidebar-bg:#ffffff;
+      --accent-primary:#4f46e5;
+      --border-subtle:#e2e8f0;
+      --text-main:#1e293b;
+      --text-muted:#64748b;
+      --danger:#ef4444;
+      --success:#10b981;
+    }
+    body{
+      background-color:var(--bg-canvas);
+      font-family:'Inter',sans-serif;
+      font-size:13px;
+      color:var(--text-main);
+      margin:0;
+      display:flex;
+      height:100vh;
+    }
+    .sidebar{
+      width:240px;
+      background:var(--sidebar-bg);
+      border-right:1px solid var(--border-subtle);
+      display:flex;
+      flex-direction:column;
+      padding:32px 20px;
+      box-shadow:4px 0 24px rgba(0,0,0,0.02);
+      z-index:10;
+    }
+    .brand{
+      font-weight:700;
+      font-size:18px;
+      color:var(--accent-primary);
+      letter-spacing:-0.5px;
+      margin-bottom:48px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .nav-menu{flex-grow:1;}
+    .nav-item{
+      display:flex;
+      align-items:center;
+      gap:12px;
+      padding:8px 14px;
+      color:var(--text-muted);
+      text-decoration:none;
+      border-radius:8px;
+      margin-bottom:4px;
+      transition:all 0.2s ease;
+      font-weight:500;
+    }
+    .nav-item:hover{background:#f1f5f9;color:var(--accent-primary);}
+    .nav-item.active{
+      background:var(--accent-primary);
+      color:#fff;
+      box-shadow:0 4px 12px rgba(79,70,229,0.2);
+    }
+    .content-area{
+      flex-grow:1;
+      padding:32px 48px;
+      overflow-y:auto;
+    }
+    .section-header{
+      margin-bottom:32px;
+      display:flex;
+      justify-content:space-between;
+      align-items:flex-start;
+    }
+    .section-title{
+      font-size:20px;
+      font-weight:700;
+      color:#0f172a;
+      margin-bottom:2px;
+    }
+    .info-container{
+      background:#fff;
+      border:1px solid var(--border-subtle);
+      border-radius:16px;
+      overflow:hidden;
+      box-shadow:0 10px 25px -5px rgba(0,0,0,0.05),0 8px 10px -6px rgba(0,0,0,0.05);
+    }
+    .info-header{
+      background:#fdfdfd;
+      padding:20px 24px;
+      border-bottom:1px solid var(--border-subtle);
+      display:flex;
+      gap:48px;
+    }
+    .info-cell{padding:24px;transition:background 0.2s;}
+    .metric-label{
+      font-size:10px;
+      font-weight:700;
+      color:var(--text-muted);
+      text-transform:uppercase;
+      letter-spacing:0.05em;
+      margin-bottom:8px;
+    }
+    .metric-value{
+      font-size:14px;
+      font-weight:600;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      color:var(--text-main);
+    }
+    .timer-box{
+      font-family:'JetBrains Mono','Courier New',monospace;
+      font-size:28px;
+      font-weight:700;
+      letter-spacing:-1px;
+    }
+    .text-primary{color:var(--accent-primary)!important;}
+    .status-dot{
+      height:9px;
+      width:9px;
+      background-color:var(--success);
+      border-radius:50%;
+      display:inline-block;
+      margin-right:8px;
+      position:relative;
+    }
+    .status-dot::after{
+      content:'';
+      position:absolute;
+      width:100%;
+      height:100%;
+      background:var(--success);
+      border-radius:50%;
+      animation:pulse 2s infinite;
+    }
+    @keyframes pulse{
+      0%{transform:scale(1);opacity:0.8;}
+      100%{transform:scale(2.5);opacity:0;}
+    }
+    .logout-link{
+      border-top:1px solid var(--border-subtle);
+      padding:16px 16px 0;
+      color:var(--danger);
+      font-weight:600;
+      text-decoration:none;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      transition:opacity 0.2s;
+    }
+    .logout-link:hover{opacity:0.7;color:var(--danger);}
+    .border-end{border-color:var(--border-subtle)!important;}
+    .border-bottom{border-color:var(--border-subtle)!important;}
 
-        /* --- Sidebar Enhancements --- */
-        .sidebar {
-            width: 240px;
-            background: var(--sidebar-bg);
-            border-right: 1px solid var(--border-subtle);
-            display: flex;
-            flex-direction: column;
-            padding: 32px 20px;
-            box-shadow: 4px 0 24px rgba(0,0,0,0.02);
-            z-index: 10;
-        }
-
-        .brand {
-            font-weight: 700;
-            font-size: 18px; /* Adjusted to scale */
-            color: var(--accent-primary);
-            letter-spacing: -0.5px;
-            margin-bottom: 48px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-menu { flex-grow: 1; }
-
-        .nav-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 14px; /* Slightly reduced padding */
-            color: var(--text-muted);
-            text-decoration: none;
-            border-radius: 8px;
-            margin-bottom: 4px;
-            transition: all 0.2s ease;
-            font-weight: 500;
-        }
-
-        .nav-item:hover {
-            background: #f1f5f9;
-            color: var(--accent-primary);
-        }
-
-        .nav-item.active {
-            background: var(--accent-primary);
-            color: #ffffff;
-            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.2);
-        }
-
-        /* --- Content Area --- */
-        .content-area {
-            flex-grow: 1;
-            padding: 32px 48px; /* Reduced padding */
-            overflow-y: auto;
-        }
-
-        .section-header {
-            margin-bottom: 32px; /* Reduced margin */
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-        .section-title {
-            font-size: 20px; /* Adjusted to scale */
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 2px;
-        }
-
-        /* --- Info Container/Card --- */
-        .info-container {
-            background: #ffffff;
-            border: 1px solid var(--border-subtle);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-        }
-
-        .info-header {
-            background: #fdfdfd;
-            padding: 20px 24px; /* Reduced padding */
-            border-bottom: 1px solid var(--border-subtle);
-            display: flex;
-            gap: 48px; /* Reduced gap */
-        }
-
-        .info-cell {
-            padding: 24px; /* Reduced padding */
-            transition: background 0.2s;
-        }
-
-        .metric-label {
-            font-size: 10px; /* Adjusted to scale */
-            font-weight: 700;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-        }
-
-        .metric-value {
-            font-size: 14px; /* Adjusted to scale */
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            color: var(--text-main);
-        }
-
-        /* --- Timers --- */
-        .timer-box {
-            font-family: 'JetBrains Mono', 'Courier New', monospace;
-            font-size: 28px; /* Adjusted to scale */
-            font-weight: 700;
-            letter-spacing: -1px;
-        }
-
-        .text-primary { color: var(--accent-primary) !important; }
-
-        /* --- Status Indicator --- */
-        .status-dot {
-            height: 9px; /* Slightly reduced */
-            width: 9px;
-            background-color: var(--success);
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 8px;
-            position: relative;
-        }
-        
-        /* Pulse Animation */
-        .status-dot::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: var(--success);
-            border-radius: 50%;
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(2.5); opacity: 0; }
-        }
-
-        .logout-link {
-            border-top: 1px solid var(--border-subtle);
-            padding: 16px 16px 0; /* Reduced padding */
-            color: var(--danger);
-            font-weight: 600;
-            text-decoration: none;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: opacity 0.2s;
-        }
-
-        .logout-link:hover { opacity: 0.7; color: var(--danger); }
-
-        .border-end { border-color: var(--border-subtle) !important; }
-        .border-bottom { border-color: var(--border-subtle) !important; }
-    </style>
+    /* small extra */
+    .pill{
+      font-family:'JetBrains Mono','Courier New',monospace;
+      font-weight:700;
+      border:1px solid var(--border-subtle);
+      background:#fff;
+      padding:6px 10px;
+      border-radius:999px;
+    }
+  </style>
 </head>
 <body>
 
 <aside class="sidebar">
-    <div class="brand">
-        <i class="bi bi-hexagon-fill"></i> ETAMS
-    </div>
+  <div class="brand">
+    <i class="bi bi-hexagon-fill"></i> ETAMS
+  </div>
 
-    <nav class="nav-menu">
-        <a href="#" class="nav-item active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
-        <a href="{% url 'attendance_report' %}" class="nav-item"><i class="bi bi-calendar-event"></i> Attendance</a>
-        <a href="{% url 'assigned_tasks' %}" class="nav-item"><i class="bi bi-check2-square"></i> My Tasks</a>
-    </nav>
+  <nav class="nav-menu">
+    <a href="#" class="nav-item active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
+    <a href="{% url 'attendance_report' %}" class="nav-item"><i class="bi bi-calendar-event"></i> Attendance</a>
+    <a href="{% url 'assigned_tasks' %}" class="nav-item"><i class="bi bi-check2-square"></i> My Tasks</a>
+  </nav>
 
-    <a href="javascript:void(0)" id="logoutTrigger" class="logout-link">
-        <i class="bi bi-box-arrow-left"></i> Logout
-    </a>
+  <a href="javascript:void(0)" id="logoutTrigger" class="logout-link">
+    <i class="bi bi-box-arrow-left"></i> Logout
+  </a>
 </aside>
 
 <main class="content-area">
-    <div class="section-header">
-        <div>
-            <div class="section-title">Employee Dashboard</div>
-            <div class="text-muted d-flex align-items-center gap-2">
-                <i class="bi bi-person-circle"></i>
-                <span>ID: <span class="text-dark fw-bold">{{ employee.employee_id }}</span></span>
-            </div>
-        </div>
-        <div class="badge bg-light text-dark border p-2 px-3 rounded-pill d-flex align-items-center">
-            <span class="status-dot"></span> <span class="small fw-semibold">Active Session</span>
-        </div>
+  <div class="section-header">
+    <div>
+      <div class="section-title">Employee Dashboard</div>
+      <div class="text-muted d-flex align-items-center gap-2">
+        <i class="bi bi-person-circle"></i>
+        <span>ID: <span class="text-dark fw-bold">{{ employee.employee_id }}</span></span>
+      </div>
     </div>
 
-    <div class="info-container">
-        <div class="info-header">
-            <div>
-                <div class="metric-label">Department</div>
-                <div class="metric-value">
-                    <i class="bi bi-building text-muted"></i> {{ employee.department.name }}
-                </div>
-            </div>
-            <div>
-                <div class="metric-label">Designation</div>
-                <div class="metric-value">
-                    <i class="bi bi-person-badge text-muted"></i> {{ employee.role }}
-                </div>
-            </div>
-        </div>
+    <div class="badge bg-light text-dark border p-2 px-3 rounded-pill d-flex align-items-center">
+      <span class="status-dot"></span>
+      <span class="small fw-semibold" id="sessionBadgeText">Active Session</span>
+    </div>
+  </div>
 
-        <div class="row g-0 border-bottom">
-            <div class="col-md-6 border-end">
-                <div class="info-cell">
-                    <div class="metric-label">Login Time</div>
-                    <div class="metric-value">
-                        <i class="bi bi-clock-history text-primary"></i>
-                        {{ attendance.login_time|time:"h:i A"|default:"--" }}
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-6">
-                <div class="info-cell">
-                    <div class="metric-label text-danger">Delay Log</div>
-                    <div class="metric-value text-danger">
-                        <i class="bi bi-exclamation-circle-fill"></i>
-                        {% if late_display %}{{ late_display }}{% else %}00 min{% endif %}
-                    </div>
-                </div>
-            </div>
+  <div class="info-container">
+    <div class="info-header">
+      <div>
+        <div class="metric-label">Department</div>
+        <div class="metric-value">
+          <i class="bi bi-building text-muted"></i> {{ employee.department.name }}
         </div>
-
-        <div class="row g-0">
-            <div class="col-md-6 border-end">
-                <div class="info-cell">
-                    <div class="metric-label text-primary">Working Time (Live)</div>
-                    <div class="timer-box text-primary" id="workTimer">00:00:00</div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="info-cell">
-                    <div class="metric-label">Total Break Time</div>
-                    <div class="timer-box text-muted" id="breakTimer">00:00:00</div>
-                </div>
-            </div>
+      </div>
+      <div>
+        <div class="metric-label">Designation</div>
+        <div class="metric-value">
+          <i class="bi bi-person-badge text-muted"></i> {{ employee.role }}
         </div>
+      </div>
     </div>
 
-    <div class="mt-4 p-3 bg-white rounded-3 small text-muted border d-inline-flex align-items-center">
-        <i class="bi bi-info-circle-fill text-primary me-2"></i>
-        Session is being recorded. Please remember to log out before leaving.
+    <div class="row g-0 border-bottom">
+      <div class="col-md-6 border-end">
+        <div class="info-cell">
+          <div class="metric-label">Login Time</div>
+          <div class="metric-value">
+            <i class="bi bi-clock-history text-primary"></i>
+            {{ attendance.login_time|time:"h:i A"|default:"--" }}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="info-cell">
+          <div class="metric-label text-danger">Delay Log</div>
+          <div class="metric-value text-danger">
+            <i class="bi bi-exclamation-circle-fill"></i>
+            {% if late_display %}{{ late_display }}{% else %}00:00:00{% endif %}
+          </div>
+        </div>
+      </div>
     </div>
+
+    <div class="row g-0 border-bottom">
+      <div class="col-md-6 border-end">
+        <div class="info-cell">
+          <div class="metric-label text-primary">Working Time (Live) - Net</div>
+          <div class="timer-box text-primary" id="workTimer">00:00:00</div>
+        
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="info-cell">
+          <div class="metric-label">Total Break Time</div>
+          <div class="timer-box text-muted" id="breakTimer">00:00:00</div>
+
+          <div class="break-controls">
+
+    <button class="break-btn start-break" id="startBreakBtn">
+        <i class="bi bi-cup-hot-fill"></i>
+        Start Break
+    </button>
+
+    <button class="break-btn end-break" id="endBreakBtn">
+        <i class="bi bi-check-circle-fill"></i>
+        End Break
+    </button>
+
+   
+
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    <div class="p-3 bg-white small text-muted border-top d-flex align-items-center gap-2">
+      <i class="bi bi-info-circle-fill text-primary"></i>
+      <span id="hintText">Logout will be enabled after you complete 8 hours net working time.</span>
+    </div>
+  </div>
+
 </main>
 
 <script>
-    const workTimer = document.getElementById("workTimer");
-    const breakTimer = document.getElementById("breakTimer");
-    const logoutBtn = document.getElementById("logoutTrigger");
+  const workTimer = document.getElementById("workTimer");
+  const breakTimer = document.getElementById("breakTimer");
+  const logoutBtn = document.getElementById("logoutTrigger");
 
-    let workSeconds = {{ working_seconds|default:0 }};
-    let breakSeconds = {{ break_seconds|default:0 }};
+  const startBreakBtn = document.getElementById("startBreakBtn");
+  const endBreakBtn = document.getElementById("endBreakBtn");
 
-    // 🕔 Office end time (5:00 PM)
-    const OFFICE_END_HOUR = 17;
-    const OFFICE_END_MIN = 0;
+  const remainingPill = document.getElementById("remainingPill");
+  const targetPill = document.getElementById("targetPill");
 
-    function formatTime(sec) {
-        const h = Math.floor(sec / 3600);
-        const m = Math.floor((sec % 3600) / 60);
-        const s = sec % 60;
-        return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  const breakStateBadge = document.getElementById("breakStateBadge");
+  const hintText = document.getElementById("hintText");
+  const sessionBadgeText = document.getElementById("sessionBadgeText");
+
+  // ✅ Values from Django (set in view)
+  let workSeconds = {{ working_seconds|default:0 }};        // NET work seconds
+  let breakSeconds = {{ break_seconds|default:0 }};         // total break seconds
+  let isOnBreak = {{ is_on_break|yesno:"true,false" }};
+  const TARGET_SECONDS = {{ target_seconds|default:28800 }}; // 8 hours
+
+  function formatTime(sec) {
+    sec = Math.max(0, sec);
+    const h = Math.floor(sec / 3600);
+    const m = Math.floor((sec % 3600) / 60);
+    const s = sec % 60;
+    return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  }
+
+  function updateButtons() {
+    startBreakBtn.disabled = isOnBreak;
+    endBreakBtn.disabled = !isOnBreak;
+  }
+
+  function updateBreakBadge() {
+    breakStateBadge.innerText = isOnBreak ? "Break: ON" : "Break: OFF";
+    sessionBadgeText.innerText = isOnBreak ? "On Break" : "Active Session";
+  }
+
+  function updateLogoutButton() {
+    if (workSeconds >= TARGET_SECONDS) {
+      logoutBtn.style.pointerEvents = "auto";
+      logoutBtn.style.opacity = "1";
+      logoutBtn.title = "You can logout now (8 hours completed)";
+      hintText.innerText = "✅ 8 hours completed. You can logout now.";
+    } else {
+      logoutBtn.style.pointerEvents = "none";
+      logoutBtn.style.opacity = "0.5";
+      logoutBtn.title = "Logout available after 8 hours net work";
+      hintText.innerText = "Logout will be enabled after you complete 8 hours net working time.";
     }
+  }
 
-    function updateLogoutButton() {
-        const now = new Date();
-        const isOfficeEnded =
-            now.getHours() > OFFICE_END_HOUR ||
-            (now.getHours() === OFFICE_END_HOUR && now.getMinutes() >= OFFICE_END_MIN);
-
-        if (isOfficeEnded) {
-            logoutBtn.style.pointerEvents = "auto";
-            logoutBtn.style.opacity = "1";
-            logoutBtn.title = "You can logout now";
-        } else {
-            logoutBtn.style.pointerEvents = "none";
-            logoutBtn.style.opacity = "0.5";
-            logoutBtn.title = "Logout available after 5:00 PM";
-        }
-    }
-
+  function paint() {
     workTimer.innerText = formatTime(workSeconds);
     breakTimer.innerText = formatTime(breakSeconds);
 
-    // ⏱ Live work timer
-    setInterval(() => {
-        workSeconds++;
-        workTimer.innerText = formatTime(workSeconds);
-        updateLogoutButton();  // re-check every second
-    }, 1000);
+    targetPill.innerText = formatTime(TARGET_SECONDS);
+    remainingPill.innerText = formatTime(TARGET_SECONDS - workSeconds);
 
-    // 🔁 Initial check on page load
+    updateButtons();
+    updateBreakBadge();
     updateLogoutButton();
+  }
 
-    logoutBtn.onclick = () => {
-        const now = new Date();
+  // ✅ Live timer:
+  // - If break ON => breakSeconds++
+  // - Else => workSeconds++
+  setInterval(() => {
+    if (isOnBreak) breakSeconds++;
+    else workSeconds++;
+    paint();
+  }, 1000);
 
-        // 🛑 Extra frontend safety
-        if (
-            now.getHours() < OFFICE_END_HOUR ||
-            (now.getHours() === OFFICE_END_HOUR && now.getMinutes() < OFFICE_END_MIN)
-        ) {
-            alert("You can logout only after 5:00 PM.");
-            return;
-        }
+  async function post(url) {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    });
+    return res.json();
+  }
 
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = "{% url 'employee_logout' %}";
+  startBreakBtn.onclick = async () => {
+    const data = await post("{% url 'start_break' %}");
+    if (!data.ok) return alert(data.msg || "Failed to start break");
+    isOnBreak = true;
+    paint();
+  };
 
-        const csrf = document.createElement("input");
-        csrf.type = "hidden";
-        csrf.name = "csrfmiddlewaretoken";
-        csrf.value = "{{ csrf_token }}";
-        form.appendChild(csrf);
+  endBreakBtn.onclick = async () => {
+    const data = await post("{% url 'end_break' %}");
+    if (!data.ok) return alert(data.msg || "Failed to end break");
+    isOnBreak = false;
+    paint();
+  };
 
-        ["work_seconds", "break_seconds"].forEach(key => {
-            const input = document.createElement("input");
-            input.type = "hidden";
-            input.name = key;
-            input.value = key === "work_seconds" ? workSeconds : breakSeconds;
-            form.appendChild(input);
-        });
+  // Logout
+  logoutBtn.onclick = () => {
+    if (workSeconds < TARGET_SECONDS) {
+      alert("You can logout only after completing 8 hours net work.");
+      return;
+    }
 
-        document.body.appendChild(form);
-        form.submit();
-    };
+    const form = document.createElement("form");
+    form.method = "POST";
+    form.action = "{% url 'employee_logout' %}";
+
+    const csrf = document.createElement("input");
+    csrf.type = "hidden";
+    csrf.name = "csrfmiddlewaretoken";
+    csrf.value = "{{ csrf_token }}";
+    form.appendChild(csrf);
+
+    document.body.appendChild(form);
+    form.submit();
+  };
+
+  // initial render
+  paint();
 </script>
 
 </body>
