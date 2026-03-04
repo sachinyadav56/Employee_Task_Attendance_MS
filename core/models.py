@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import timedelta
+from django.utils import timezone
 from django.contrib.auth.hashers import make_password, check_password
 
 ROLE_CHOICES = (
@@ -90,6 +91,10 @@ class Attendance(models.Model):
     break1_added = models.BooleanField(default=False)  # 11:15 – 11:30
     break2_added = models.BooleanField(default=False)  # 1:00 – 1:30
     break3_added = models.BooleanField(default=False)  # 4:15 – 4:30
+    
+    # ✅ NEW: live break state
+    is_on_break = models.BooleanField(default=False)
+    break_started_at = models.DateTimeField(null=True, blank=True)
 
     STATUS_CHOICES = [
         ('Present', 'Present'),
@@ -107,3 +112,23 @@ class Attendance(models.Model):
 
     def __str__(self):
         return f"{self.employee.employee_id} - {self.date}"
+    
+# ✅ NEW MODEL: multiple breaks per day
+class BreakSession(models.Model):
+    attendance = models.ForeignKey(Attendance, on_delete=models.CASCADE, related_name="break_sessions")
+    start_at = models.DateTimeField()
+    end_at = models.DateTimeField(null=True, blank=True)
+    duration = models.DurationField(default=timedelta())
+
+    def close(self):
+        """Close break and store duration."""
+        if self.end_at is None:
+            self.end_at = timezone.now()
+        if self.end_at < self.start_at:
+            self.end_at = self.start_at
+        self.duration = self.end_at - self.start_at
+        self.save(update_fields=["end_at", "duration"])
+
+    def __str__(self):
+        return f"Break({self.attendance_id}) {self.start_at} - {self.end_at}"
+    
