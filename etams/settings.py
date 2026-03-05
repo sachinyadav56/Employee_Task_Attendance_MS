@@ -144,7 +144,17 @@ JAZZMIN_SETTINGS = {
     "show_sidebar": True,
     "navigation_expanded": True,
 
-    # Side menu ordering (apps/models) :contentReference[oaicite:3]{index=3}
+    # ⭐ Top Header Menu (Added Logout Button)
+    "topmenu_links": [
+        
+            {
+    "name": "Logout",
+    "url": "/admin-logout/",
+    "icon": "fas fa-sign-out-alt",
+},
+    ],
+
+    # Side menu ordering
     "order_with_respect_to": [
         "core",
         "core.Employee",
@@ -154,7 +164,7 @@ JAZZMIN_SETTINGS = {
         "auth",
     ],
 
-    # “Grouping” feel using custom links under core app :contentReference[oaicite:4]{index=4}
+    # Custom grouped links
     "custom_links": {
         "core": [
             {
@@ -195,6 +205,7 @@ JAZZMIN_SETTINGS = {
     "show_ui_builder": True,
 }
 
+ 
 JAZZMIN_UI_TWEAKS = {
     "theme": "darkly",
 }

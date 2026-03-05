@@ -4,12 +4,21 @@ from django.utils import timezone
 from datetime import datetime, timedelta, date, time
 from django.views.decorators.http import require_POST
 from .models import BreakSession
+from .models import BreakSession 
 
 from .models import Employee, Task, Attendance, Department, Role
 from .forms import EmployeeForm, TaskForm
 from .decorators import employee_login_required
 from django.http import JsonResponse
 
+
+
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+def admin_logout(request):
+    logout(request)  # logs out django admin user
+    return redirect("/admin")
 
 # EMPLOYEE LOGIN
 def employee_login(request):
@@ -96,9 +105,7 @@ def employee_login(request):
 
 
 # EMPLOYEE DASHBOARD
-# views.py (inside employee_dashboard)
-
-from .models import BreakSession  # add this import
+ 
 
 @employee_login_required
 def employee_dashboard(request):
@@ -233,7 +240,7 @@ def employee_logout(request):
         net_work = timedelta()
 
     # ✅ REQUIRED NET WORK = 8 hours
-    if net_work < timedelta(hours=8):
+    if gross_work < timedelta(hours=8):
         remaining = timedelta(hours=8) - net_work
         rem_sec = int(remaining.total_seconds())
         rh = rem_sec // 3600

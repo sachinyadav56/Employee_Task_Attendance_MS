@@ -353,9 +353,12 @@
   // ✅ Live timer:
   // - If break ON => breakSeconds++
   // - Else => workSeconds++
+   // ✅ Live timer:
+  // - Work time (8 hours target) includes break, so ALWAYS increment workSeconds
+  // - If break ON, ALSO increment breakSeconds
   setInterval(() => {
-    if (isOnBreak) breakSeconds++;
-    else workSeconds++;
+    workSeconds++;                 // ✅ always live
+    if (isOnBreak) breakSeconds++; // ✅ break live only on break
     paint();
   }, 1000);
 

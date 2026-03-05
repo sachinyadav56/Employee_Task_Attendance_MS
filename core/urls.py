@@ -10,4 +10,7 @@ urlpatterns = [
     path('attendance/', views.attendance_report, name='attendance_report'),
     path('task/update/<int:task_id>/', views.update_task_status, name='update_task_status'),
     path('get-roles/', views.get_roles, name='get_roles'),
+    path("break/start/", views.start_break, name="start_break"),
+    path("break/end/", views.end_break, name="end_break"),
+    path("admin-logout/", views.admin_logout, name="admin_logout"),
 ]
