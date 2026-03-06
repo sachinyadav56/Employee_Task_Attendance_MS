@@ -9,6 +9,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
     <style>
         :root {
             --primary: #4f46e5;
@@ -34,7 +37,6 @@
             margin: 0 auto;
         }
 
-        /* --- Header --- */
         .page-header {
             background: var(--surface);
             padding: 1rem 1.25rem;
@@ -56,7 +58,6 @@
             font-size: 1.1rem;
         }
 
-        /* --- Table Styling --- */
         .report-card {
             background: var(--surface);
             border: 1px solid var(--border-color);
@@ -65,11 +66,20 @@
             overflow: hidden;
         }
 
+        .chart-card{
+            background: var(--surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 12px 14px;
+            margin-bottom: 1rem;
+        }
+
         .table thead th {
             background: #fcfcfd;
             color: var(--text-muted);
             font-weight: 600;
-            font-size: 0.7rem; /* Further reduced */
+            font-size: 0.7rem;
             text-transform: uppercase;
             letter-spacing: 0.05em;
             padding: 0.75rem 1rem;
@@ -77,17 +87,16 @@
         }
 
         .table tbody td {
-            padding: 0.65rem 1rem; /* Reduced padding */
+            padding: 0.65rem 1rem;
             border-bottom: 1px solid var(--border-color);
-            font-size: 0.75rem; /* Further reduced for single line */
+            font-size: 0.75rem;
             color: var(--text-main);
             vertical-align: middle;
-            white-space: nowrap; /* Forces single line */
+            white-space: nowrap;
         }
 
         .table tbody tr:hover { background-color: #f8fafc; }
 
-        /* --- Time and Pill Styling --- */
         .time-badge {
             font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
             background: #f1f5f9;
@@ -112,7 +121,6 @@
             font-size: 0.7rem;
         }
 
-        /* --- Compact Badges --- */
         .status-pill {
             padding: 2px 8px;
             border-radius: 100px;
@@ -136,23 +144,34 @@
         .status-present .pulse { background: #10b981; }
         .status-late .pulse { background: #f59e0b; }
 
-        /* --- Buttons --- */
         .btn-modern {
             padding: 0.4rem 0.8rem;
             border-radius: 6px;
-            font-weight: 600;
+            font-weight: 700;
             font-size: 0.75rem;
             display: inline-flex;
             align-items: center;
             gap: 5px;
+        }
+
+        .select-modern{
+            font-size: 0.78rem;
+            font-weight: 600;
+            border-radius: 8px;
+        }
+
+        .subtext{
+            font-size:0.72rem;
+            color: var(--text-muted);
+            font-weight: 600;
         }
     </style>
 </head>
 <body>
 
 <div class="container-fluid max-width-container">
-    
-    <header class="page-header d-md-flex align-items-center justify-content-between">
+
+    <header class="page-header d-md-flex align-items-center justify-content-between gap-2">
         <div class="d-flex align-items-center">
             <div class="icon-box me-3">
                 <i class="bi bi-shield-check"></i>
@@ -162,12 +181,46 @@
                 <p class="text-muted mb-0" style="font-size: 0.75rem;">Review daily activity and working hours</p>
             </div>
         </div>
-        <div class="mt-2 mt-md-0 d-flex gap-2">
+
+        <div class="mt-2 mt-md-0 d-flex gap-2 flex-wrap align-items-center">
+
+            <!-- ✅ Month Filter -->
+            <form method="GET" class="d-flex align-items-center gap-2">
+                <div>
+                    <div class="subtext mb-1">Filter Month</div>
+                    <select name="month" class="form-select select-modern" onchange="this.form.submit()">
+                        <option value="">All</option>
+                        {% for m in months %}
+                            <option value="{{ m }}" {% if month == m %}selected{% endif %}>{{ m }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </form>
+
+            <!-- ✅ Buttons -->
             <a href="{% url 'employee_dashboard' %}" class="btn btn-primary btn-modern">
                 <i class="bi bi-house-door"></i> Dashboard
             </a>
+
+            <a class="btn btn-outline-primary btn-modern"
+               href="?month={{ month }}&export=csv">
+                <i class="bi bi-download"></i> Export CSV
+            </a>
         </div>
     </header>
+
+    <!-- ✅ Analytics Graph -->
+    <div class="chart-card">
+        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <div>
+                <div class="fw-bold" style="font-size:0.9rem;">Attendance Analytics</div>
+                <div class="subtext">Total vs Break vs Net (hours) + Late minutes</div>
+            </div>
+        </div>
+        <div class="mt-2">
+            <canvas id="attendanceChart" height="110"></canvas>
+        </div>
+    </div>
 
     <div class="card report-card">
         <div class="table-responsive">
@@ -176,9 +229,9 @@
                     <tr>
                         <th class="ps-3">Date</th>
                         <th>Login/Out</th>
-                        <th>Logged Time</th>
-                        <th>Break</th>
                         <th>Total Time</th>
+                        <th>Break</th>
+                        <th>Net Time</th>
                         <th class="text-end pe-3">Status</th>
                     </tr>
                 </thead>
@@ -188,6 +241,7 @@
                         <td class="fw-bold text-dark ps-3">
                             {{ a.date|date:"M d, Y" }}
                         </td>
+
                         <td>
                             <div class="d-flex align-items-center gap-1">
                                 <span class="time-badge">{{ a.login_time|time:"h:i A"|default:"--" }}</span>
@@ -195,28 +249,32 @@
                                 <span class="time-badge">{{ a.logout_time|time:"h:i A"|default:"--" }}</span>
                             </div>
                         </td>
+
                         <td>
                             <span class="text-dark fw-bold">{{ a.total_hours_fmt|default:"00h 00m" }}</span>
                         </td>
+
                         <td>
                             <span class="break-text">
                                 <i class="bi bi-cup-hot me-1"></i>{{ a.break_time_fmt|default:"0h 0m" }}
                             </span>
                         </td>
+
                         <td>
                             <span class="work-hours-pill">
                                 {{ a.net_working_fmt|default:"00h 00m" }}
                             </span>
                         </td>
+
                         <td class="text-end pe-3">
-                            {% if a.status == "Late" %}
-                                <span class="status-pill status-late">
-                                    <span class="pulse"></span> Present
-                                </span>
+                            {% if a.status == "Absent" %}
+                    <span class="status-pill" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">
+                  <span class="pulse" style="background:#dc2626;"></span> Absent
+                   </span>
                             {% else %}
-                                <span class="status-pill status-present">
-                                    <span class="pulse"></span> Present
-                                </span>
+                            <span class="status-pill status-present">
+                               <span class="pulse"></span> Present
+                             </span>
                             {% endif %}
                         </td>
                     </tr>
@@ -233,6 +291,39 @@
         </div>
     </div>
 </div>
+
+<script>
+  // ✅ Chart Data from Django
+  const labels = {{ chart_labels|safe }};
+  const totalHours = {{ chart_total|safe }};
+  const breakHours = {{ chart_break|safe }};
+  const netHours = {{ chart_net|safe }};
+  const lateMinutes = {{ chart_late_minutes|safe }};
+
+  const ctx = document.getElementById("attendanceChart");
+  new Chart(ctx, {
+    data: {
+      labels: labels,
+      datasets: [
+        { type: "line", label: "Total Hours", data: totalHours, tension: 0.35, borderWidth: 3, pointRadius: 3 },
+        { type: "line", label: "Break Hours", data: breakHours, tension: 0.35, borderWidth: 3, pointRadius: 3 },
+        { type: "line", label: "Net Hours", data: netHours, tension: 0.35, borderWidth: 3, pointRadius: 3 },
+        { type: "bar",  label: "Late Minutes", data: lateMinutes, borderWidth: 0 }
+      ]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: { position: "top" },
+        tooltip: { mode: "index", intersect: false }
+      },
+      interaction: { mode: "index", intersect: false },
+      scales: {
+        y: { beginAtZero: true, title: { display: true, text: "Hours / Minutes" } }
+      }
+    }
+  });
+</script>
 
 </body>
 </html>

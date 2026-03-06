@@ -1,38 +1,72 @@
 from django.contrib import admin
 from django.contrib.auth.hashers import make_password
-from .models import Department, Employee, Task, Attendance
+from django.utils.html import format_html
+from django.utils import timezone
+from django.contrib.admin.sites import AdminSite
+from datetime import timedelta
+
+from .models import Department, Employee, Task, Attendance, Role, BreakSession
+
+
+def create_daily_absent_records():
+    today = timezone.localdate()
+
+    # Skip Saturday and Sunday
+    if today.weekday() in (5, 6):
+        return
+
+    active_employees = Employee.objects.filter(is_active=True)
+
+    for employee in active_employees:
+        Attendance.objects.get_or_create(
+            employee=employee,
+            date=today,
+            defaults={
+                "status": "Absent",
+                "login_time": None,
+                "logout_time": None,
+                "late_by": timedelta(),
+                "total_hours": timedelta(),
+                "break_time": timedelta(),
+                "net_working_hours": timedelta(),
+                "is_on_break": False,
+                "break_started_at": None,
+            }
+        )
+
 
 @admin.register(Department)
 class DepartmentAdmin(admin.ModelAdmin):
     list_display = ('id', 'name')
     search_fields = ('name',)
 
+
+@admin.register(Role)
+class RoleAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name', 'department')
+    list_filter = ('department',)
+    search_fields = ('name',)
+
+
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    # Using 'department' (the field name) shows the __str__ value (the Name)
     list_display = ('employee_id', 'department', 'role', 'phone', 'is_active')
     list_filter = ('department', 'role', 'is_active')
     search_fields = ('employee_id', 'phone')
 
     def save_model(self, request, obj, form, change):
-        # Automatically hash the password if it's saved as plain text
         if obj.password and not obj.password.startswith('pbkdf2_sha256$'):
             obj.password = make_password(obj.password)
         super().save_model(request, obj, form, change)
+
 
 @admin.register(Task)
 class TaskAdmin(admin.ModelAdmin):
     list_display = ('title', 'employee', 'is_completed', 'assigned_date')
 
-from django.contrib import admin
-from django.utils.html import format_html
-from django.utils.timezone import localtime
-from .models import Department, Employee, Task, Attendance
-
 
 @admin.register(Attendance)
 class AttendanceAdmin(admin.ModelAdmin):
-
     list_display = (
         'employee_id',
         'date',
@@ -48,10 +82,6 @@ class AttendanceAdmin(admin.ModelAdmin):
     search_fields = ('employee__employee_id',)
     date_hierarchy = 'date'
     ordering = ('-date',)
-
-    # -----------------------------
-    # CUSTOM COLUMNS
-    # -----------------------------
 
     def employee_id(self, obj):
         return obj.employee.employee_id
@@ -105,22 +135,30 @@ class AttendanceAdmin(admin.ModelAdmin):
         return "00:00:00"
     formatted_net_work.short_description = "Net Working"
 
-from django.utils import timezone
-from django.contrib.admin.sites import AdminSite
-from .models import Employee, Attendance, Task
+
+@admin.register(BreakSession)
+class BreakSessionAdmin(admin.ModelAdmin):
+    list_display = ("attendance", "start_at", "end_at", "duration")
+    list_filter = ("start_at", "end_at")
+    search_fields = ("attendance__employee__employee_id",)
+
 
 _old_each_context = AdminSite.each_context
 
 def _new_each_context(self, request):
+    create_daily_absent_records()  # ✅ important
+
     ctx = _old_each_context(self, request)
     today = timezone.localdate()
-    
+
     ctx["today_date"] = today.isoformat()
     ctx["card_total_employees"] = Employee.objects.filter(is_active=True).count()
     ctx["card_present_today"] = Attendance.objects.filter(date=today, status="Present").count()
     ctx["card_tasks_completed_today"] = Task.objects.filter(
-        assigned_date=today, is_completed=True
+        assigned_date=today,
+        is_completed=True
     ).count()
+    ctx["card_absent_today"] = Attendance.objects.filter(date=today, status="Absent").count()
     return ctx
 
 AdminSite.each_context = _new_each_context

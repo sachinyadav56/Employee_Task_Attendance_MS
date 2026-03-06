@@ -169,6 +169,46 @@
       padding:6px 10px;
       border-radius:999px;
     }
+/* Break buttons container */
+.break-controls{
+  display:flex;
+  gap:12px;
+  margin-top:10px;
+}
+
+/* Common button style */
+.break-btn{
+  border:0;
+  padding:6px 14px;
+  border-radius:10px;
+  font-weight:600;
+  font-size:13px;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  color:#fff;
+  cursor:pointer;
+  white-space:nowrap;
+  transition:all 0.2s ease;
+}
+
+/* Start Break - Professional Blue */
+.start-break{
+  background:#2563eb;
+}
+
+.start-break:hover{
+  background:#1d4ed8;
+}
+
+/* End Break - Professional Green */
+.end-break{
+  background:#16a34a;
+}
+
+.end-break:hover{
+  background:#15803d;
+}
   </style>
 </head>
 <body>
@@ -182,6 +222,7 @@
     <a href="#" class="nav-item active"><i class="bi bi-grid-1x2-fill"></i> Dashboard</a>
     <a href="{% url 'attendance_report' %}" class="nav-item"><i class="bi bi-calendar-event"></i> Attendance</a>
     <a href="{% url 'assigned_tasks' %}" class="nav-item"><i class="bi bi-check2-square"></i> My Tasks</a>
+  
   </nav>
 
   <a href="javascript:void(0)" id="logoutTrigger" class="logout-link">
@@ -246,7 +287,7 @@
     <div class="row g-0 border-bottom">
       <div class="col-md-6 border-end">
         <div class="info-cell">
-          <div class="metric-label text-primary">Working Time (Live) - Net</div>
+          <div class="metric-label text-primary">Working Time </div>
           <div class="timer-box text-primary" id="workTimer">00:00:00</div>
         
         </div>
@@ -260,12 +301,12 @@
           <div class="break-controls">
 
     <button class="break-btn start-break" id="startBreakBtn">
-        <i class="bi bi-cup-hot-fill"></i>
+       
         Start Break
     </button>
 
     <button class="break-btn end-break" id="endBreakBtn">
-        <i class="bi bi-check-circle-fill"></i>
+        
         End Break
     </button>
 
