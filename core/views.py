@@ -54,11 +54,19 @@ def admin_logout(request):
 
 # EMPLOYEE LOGIN
 def employee_login(request):
-    # ✅ ensure absent records are created for all employees on weekdays
     create_daily_absent_records()
 
     today = timezone.localdate()
+    now = timezone.localtime(timezone.now())
+    current_time = now.time()
+
     is_weekend_off = today.weekday() in (5, 6)  # Sat, Sun
+
+    # Office timing
+    LOGIN_START_TIME = time(10, 0)   # login allowed from 10:00 AM
+    GRACE_TIME = time(10, 10)        # no delay till 10:10 AM
+
+    is_before_login_time = current_time < LOGIN_START_TIME
 
     # AJAX: fetch roles by department
     if request.method == 'GET' and request.GET.get('dept_id'):
@@ -69,6 +77,10 @@ def employee_login(request):
     if request.method == 'POST':
         if is_weekend_off:
             messages.error(request, "Today is off (Saturday/Sunday). Login is disabled.")
+            return redirect('employee_login')
+
+        if is_before_login_time:
+            messages.error(request, "Login starts at 10:00 AM.")
             return redirect('employee_login')
 
         emp_id = request.POST.get('employee_id', '').strip()
@@ -82,7 +94,7 @@ def employee_login(request):
                 is_active=True
             )
         except Employee.DoesNotExist:
-            messages.error(request, "Invalid Employee ID / Department / Role")
+            messages.error(request, "Invalid Employee ID / Department")
             return redirect('employee_login')
 
         if not employee.check_password(password):
@@ -91,21 +103,19 @@ def employee_login(request):
 
         request.session['employee_id'] = employee.id
 
-        now = timezone.localtime(timezone.now())
-        login_time = now.time()
-        GRACE_TIME = time(10, 15)
+        login_time = current_time
 
+        # Delay calculation only after 10:10 AM
         if login_time <= GRACE_TIME:
             late_by = timedelta()
         else:
-            dt_login = datetime.combine(date.today(), login_time)
-            dt_grace = datetime.combine(date.today(), GRACE_TIME)
+            dt_login = datetime.combine(today, login_time)
+            dt_grace = datetime.combine(today, GRACE_TIME)
             late_by = dt_login - dt_grace
 
-        # ✅ Since absent record may already exist, update it
         attendance, created = Attendance.objects.get_or_create(
             employee=employee,
-            date=date.today(),
+            date=today,
             defaults={
                 'login_time': login_time,
                 'status': 'Present',
@@ -116,14 +126,13 @@ def employee_login(request):
             }
         )
 
-        # If record already existed as Absent, convert it to Present on login
         if attendance.login_time is None:
             attendance.login_time = login_time
             attendance.status = "Present"
             attendance.late_by = late_by
             attendance.save(update_fields=["login_time", "status", "late_by"])
 
-        messages.success(request, "Login successful")
+        messages.success(request, "Login successful.")
         return redirect('employee_dashboard')
 
     departments = Department.objects.all()
@@ -131,6 +140,9 @@ def employee_login(request):
         'departments': departments,
         'is_weekend_off': is_weekend_off,
         'today_name': today.strftime("%A"),
+        'is_before_login_time': is_before_login_time,
+        'login_start_time': "10:00 AM",
+        'grace_time': "10:10 AM",
     })
 
 
@@ -154,7 +166,7 @@ def employee_dashboard(request):
         now = timezone.localtime(timezone.now())
         dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
 
-        office_start = timezone.make_aware(datetime.combine(date.today(), time(10, 15)), tz)
+        office_start = timezone.make_aware(datetime.combine(date.today(), time(10, 10)), tz)
         if dt_login > office_start:
             late_seconds = int((dt_login - office_start).total_seconds())
             h = late_seconds // 3600

@@ -179,6 +179,14 @@
       </div>
     {% endif %}
 
+    {% if is_before_login_time and not is_weekend_off %}
+<div class="alert alert-warning d-flex align-items-center" role="alert"
+     style="background:#fff7ed; color:#9a3412;">
+    <i class="bi bi-clock-fill me-2"></i>
+    Login starts at {{ login_start_time }}. Grace time is allowed till {{ grace_time }}.
+</div>
+{% endif %}
+
         <form method="post" id="loginForm">
             {% csrf_token %}
 
@@ -211,9 +219,14 @@
                 </div>
             </div>
 
-            <button type="submit" class="btn btn-login btn-primary w-100" id="submitBtn">
-                Login
-            </button>
+            <button type="submit" class="btn btn-login btn-primary w-100" id="submitBtn"
+        {% if is_weekend_off or is_before_login_time %}disabled{% endif %}>
+    {% if is_before_login_time %}
+        Login starts at 10:00 AM
+    {% else %}
+        Login
+    {% endif %}
+</button>
         </form>
 
         <div class="footer-note">
@@ -224,7 +237,6 @@
 </div>
 
 <script>
-    // Toggle Password Visibility
     function togglePassword() {
         const input = document.getElementById('passwordInput');
         const icon = document.getElementById('toggleIcon');
@@ -237,9 +249,10 @@
         }
     }
 
-    // Add loading state on submit
     document.getElementById('loginForm').addEventListener('submit', function() {
         const btn = document.getElementById('submitBtn');
+        if (btn.disabled) return;
+
         btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in...';
         btn.disabled = true;
     });

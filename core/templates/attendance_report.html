@@ -298,46 +298,6 @@
     </header>
 
     <div class="chart-card">
-        <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <div>
-                <div class="chart-title">Attendance Analytics</div>
-                <div class="chart-note">Total, break, net working hours and late minutes in one clean chart</div>
-            </div>
-        </div>
-
-        <div class="stats-grid">
-            <div class="mini-stat">
-                <div class="mini-stat-icon icon-total">
-                    <i class="bi bi-clock-history"></i>
-                </div>
-                <div class="mini-stat-label">Total Records</div>
-                <div class="mini-stat-value">{{ records|length }}</div>
-            </div>
-
-            <div class="mini-stat">
-                <div class="mini-stat-icon icon-break">
-                    <i class="bi bi-cup-hot"></i>
-                </div>
-                <div class="mini-stat-label">Break Tracking</div>
-                <div class="mini-stat-value">Live Summary</div>
-            </div>
-
-            <div class="mini-stat">
-                <div class="mini-stat-icon icon-net">
-                    <i class="bi bi-graph-up-arrow"></i>
-                </div>
-                <div class="mini-stat-label">Net Work</div>
-                <div class="mini-stat-value">Performance View</div>
-            </div>
-
-            <div class="mini-stat">
-                <div class="mini-stat-icon icon-late">
-                    <i class="bi bi-alarm"></i>
-                </div>
-                <div class="mini-stat-label">Late Insight</div>
-                <div class="mini-stat-value">Minutes Trend</div>
-            </div>
-        </div>
 
         <div class="chart-wrap">
             <canvas id="attendanceChart"></canvas>
