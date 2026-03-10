@@ -5,13 +5,15 @@ from django.utils import timezone
 from django.contrib.admin.sites import AdminSite
 from datetime import timedelta
 
-from .models import Department, Employee, Task, Attendance, Role, BreakSession
+from .models import (
+    Department, Employee, Task, Attendance, Role, BreakSession,
+    Announcement, Meeting, ITReport
+)
 
 
 def create_daily_absent_records():
     today = timezone.localdate()
 
-    # Skip Saturday and Sunday
     if today.weekday() in (5, 6):
         return
 
@@ -23,8 +25,6 @@ def create_daily_absent_records():
             date=today,
             defaults={
                 "status": "Absent",
-                "login_time": None,
-                "logout_time": None,
                 "late_by": timedelta(),
                 "total_hours": timedelta(),
                 "break_time": timedelta(),
@@ -77,7 +77,6 @@ class AttendanceAdmin(admin.ModelAdmin):
         'formatted_break',
         'formatted_net_work',
     )
-
     list_filter = ('status', 'date', 'employee')
     search_fields = ('employee__employee_id',)
     date_hierarchy = 'date'
@@ -88,24 +87,16 @@ class AttendanceAdmin(admin.ModelAdmin):
     employee_id.short_description = "Employee ID"
 
     def formatted_login(self, obj):
-        if obj.login_time:
-            return obj.login_time.strftime("%I:%M %p")
-        return "-"
+        return obj.login_time.strftime("%I:%M %p") if obj.login_time else "-"
     formatted_login.short_description = "Login"
 
     def formatted_logout(self, obj):
-        if obj.logout_time:
-            return obj.logout_time.strftime("%I:%M %p")
-        return "-"
+        return obj.logout_time.strftime("%I:%M %p") if obj.logout_time else "-"
     formatted_logout.short_description = "Logout"
 
     def colored_status(self, obj):
         color = "green" if obj.status == "Present" else "red"
-        return format_html(
-            '<span style="color:{}; font-weight:bold;">{}</span>',
-            color,
-            obj.status
-        )
+        return format_html('<span style="color:{}; font-weight:bold;">{}</span>', color, obj.status)
     colored_status.short_description = "Status"
 
     def formatted_late(self, obj):
@@ -143,10 +134,31 @@ class BreakSessionAdmin(admin.ModelAdmin):
     search_fields = ("attendance__employee__employee_id",)
 
 
+@admin.register(Announcement)
+class AnnouncementAdmin(admin.ModelAdmin):
+    list_display = ("title", "priority", "department", "is_for_all", "is_active", "created_at", "expiry_date")
+    list_filter = ("priority", "is_active", "is_for_all", "department")
+    search_fields = ("title", "message")
+
+
+@admin.register(Meeting)
+class MeetingAdmin(admin.ModelAdmin):
+    list_display = ("title", "date", "start_time", "end_time", "mode", "department", "status")
+    list_filter = ("status", "mode", "department", "date")
+    search_fields = ("title", "agenda", "location")
+
+
+@admin.register(ITReport)
+class ITReportAdmin(admin.ModelAdmin):
+    list_display = ("title", "employee", "issue_type", "priority", "status", "created_at")
+    list_filter = ("issue_type", "priority", "status")
+    search_fields = ("title", "employee__employee_id", "description")
+
+
 _old_each_context = AdminSite.each_context
 
 def _new_each_context(self, request):
-    create_daily_absent_records()  # ✅ important
+    create_daily_absent_records()
 
     ctx = _old_each_context(self, request)
     today = timezone.localdate()
@@ -159,6 +171,7 @@ def _new_each_context(self, request):
         is_completed=True
     ).count()
     ctx["card_absent_today"] = Attendance.objects.filter(date=today, status="Absent").count()
+    ctx["card_open_it_reports"] = ITReport.objects.filter(status__in=["Open", "In Progress"]).count()
     return ctx
 
 AdminSite.each_context = _new_each_context
