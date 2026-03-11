@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Announcement | ETAMS</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --bg:#f5f7fb;
+            --surface:#ffffff;
+            --border:#e5e7eb;
+            --text:#0f172a;
+            --muted:#64748b;
+            --primary:#4f46e5;
+            --danger:#dc2626;
+            --shadow:0 8px 22px rgba(15,23,42,0.05);
+            --radius:12px;
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:'Inter',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            font-size:11px;
+        }
+
+        .topbar{
+            background:var(--surface);
+            border-bottom:1px solid var(--border);
+            padding:12px 18px;
+            display:flex;
+            justify-content:space-between;
+            align-items:center;
+            gap:12px;
+            box-shadow:var(--shadow);
+        }
+
+        .brand{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            font-size:14px;
+            font-weight:700;
+            color:var(--primary);
+            white-space:nowrap;
+        }
+
+        .nav-links{
+            display:flex;
+            align-items:center;
+            gap:8px;
+            flex-wrap:wrap;
+        }
+
+        .nav-link-item{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:7px 12px;
+            border:1px solid var(--border);
+            border-radius:8px;
+            background:#fff;
+            color:var(--text);
+            text-decoration:none;
+            font-size:11px;
+            font-weight:600;
+            transition:0.18s ease;
+        }
+
+        .nav-link-item:hover{
+            border-color:var(--primary);
+            color:var(--primary);
+            background:#fafaff;
+        }
+
+        .nav-link-item.active{
+            background:var(--primary);
+            color:#fff;
+            border-color:var(--primary);
+        }
+
+        .logout-link{
+            color:var(--danger);
+        }
+
+        .page-wrap{
+            max-width:760px;
+            margin:0 auto;
+            padding:20px 14px;
+        }
+
+        .page-title{
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:3px;
+        }
+
+        .subtext{
+            font-size:11px;
+            color:var(--muted);
+            margin-bottom:14px;
+        }
+
+        .form-card{
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            padding:16px;
+        }
+
+        .form-label{
+            font-size:11px;
+            font-weight:600;
+            margin-bottom:6px;
+            color:var(--text);
+        }
+
+        .form-control,
+        .form-select,
+        textarea,
+        input,
+        select{
+            border-radius:8px !important;
+            border:1px solid #dbe3ee !important;
+            padding:8px 10px !important;
+            font-size:11px !important;
+            box-shadow:none !important;
+        }
+
+        .form-control:focus,
+        .form-select:focus,
+        textarea:focus,
+        input:focus,
+        select:focus{
+            border-color:var(--primary) !important;
+            box-shadow:0 0 0 0.15rem rgba(79,70,229,0.08) !important;
+        }
+
+        textarea{
+            min-height:110px;
+            resize:vertical;
+        }
+
+        .form-check{
+            display:flex;
+            align-items:center;
+            gap:7px;
+            margin-top:4px;
+        }
+
+        .form-check input{
+            margin:0;
+            padding:0 !important;
+        }
+
+        .form-check-label{
+            font-size:11px;
+            color:var(--text);
+            font-weight:500;
+        }
+
+        .btn-modern{
+            border-radius:8px;
+            padding:8px 12px;
+            font-size:11px;
+            font-weight:600;
+        }
+
+        .alert{
+            font-size:11px;
+            border-radius:8px;
+            padding:8px 10px;
+            margin-bottom:12px;
+        }
+
+        @media (max-width: 768px){
+            .topbar{
+                flex-direction:column;
+                align-items:flex-start;
+            }
+
+            .nav-links{
+                width:100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <i class="bi bi-kanban-fill"></i> ETAMS Management
+    </div>
+
+    <div class="nav-links">
+        <a href="{% url 'add_announcement' %}" class="nav-link-item active">
+            <i class="bi bi-megaphone-fill"></i> Add Announcement
+        </a>
+
+        <a href="{% url 'add_meeting' %}" class="nav-link-item">
+            <i class="bi bi-calendar-plus-fill"></i> Add Meeting
+        </a>
+
+        <a href="{% url 'management_it_reports' %}" class="nav-link-item">
+            <i class="bi bi-life-preserver"></i> IT Reports
+        </a>
+
+        <a href="{% url 'employee_logout' %}" class="nav-link-item logout-link">
+            <i class="bi bi-box-arrow-right"></i> Logout
+        </a>
+    </div>
+</header>
+
+<main class="page-wrap">
+    <div class="page-title">Add Announcement</div>
+    <div class="subtext">Create a new announcement for all employees or for a selected department.</div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="form-card">
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                {{ form.title }}
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Message</label>
+                {{ form.message }}
+            </div>
+
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Priority</label>
+                    {{ form.priority }}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Department</label>
+                    {{ form.department }}
+                </div>
+
+                <div class="col-md-4 mb-3">
+                    <label class="form-label">Expiry Date</label>
+                    {{ form.expiry_date }}
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6 mb-2">
+                    <div class="form-check">
+                        {{ form.is_for_all }}
+                        <label class="form-check-label">For all employees</label>
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <div class="form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label">Active</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-3">
+                <button type="submit" class="btn btn-primary btn-modern">
+                    <i class="bi bi-check-circle"></i> Save
+                </button>
+
+                <a href="{% url 'announcement_list' %}" class="btn btn-outline-secondary btn-modern">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</main>
+
+</body>
+</html>

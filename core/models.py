@@ -15,7 +15,6 @@ class Department(models.Model):
     def __str__(self):
         return self.name
 
-
 class Role(models.Model):
     name = models.CharField(max_length=100)
     department = models.ForeignKey(Department, on_delete=models.CASCADE, related_name='roles')
@@ -40,7 +39,7 @@ class Employee(models.Model):
         return check_password(raw_password, self.password)
 
     def is_manager(self):
-        return self.role and self.role.name.strip().lower() == "manager"
+        return self.role and "manager" in self.role.name.lower()
 
     def __str__(self):
         return self.employee_id

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Announcements | ETAMS</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --bg:#f5f7fb;
+            --surface:#ffffff;
+            --border:#e5e7eb;
+            --text:#0f172a;
+            --muted:#64748b;
+            --primary:#4f46e5;
+            --success:#059669;
+            --warning:#d97706;
+            --danger:#dc2626;
+            --shadow:0 8px 22px rgba(15, 23, 42, 0.05);
+            --radius:12px;
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:'Inter',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            font-size:11px;
+            padding:16px;
+        }
+
+        .page-wrap{
+            max-width:1100px;
+            margin:0 auto;
+        }
+
+        .page-head{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:12px;
+            margin-bottom:14px;
+        }
+
+        .page-title{
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:3px;
+            color:var(--text);
+        }
+
+        .subtext{
+            color:var(--muted);
+            font-size:11px;
+        }
+
+        .top-actions .btn{
+            border-radius:8px;
+            font-weight:600;
+            font-size:11px;
+            padding:7px 12px;
+        }
+
+        .section-card{
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            padding:14px;
+        }
+
+        .announcement-card{
+            border:1px solid #e9eef5;
+            border-radius:10px;
+            padding:14px;
+            background:#fff;
+            height:100%;
+            transition:all 0.18s ease;
+        }
+
+        .announcement-card:hover{
+            background:#fbfdff;
+            box-shadow:0 6px 16px rgba(15,23,42,0.04);
+        }
+
+        .announcement-title{
+            font-size:13px;
+            font-weight:700;
+            margin-bottom:6px;
+            color:var(--text);
+            line-height:1.4;
+        }
+
+        .announcement-message{
+            font-size:11px;
+            color:#334155;
+            line-height:1.6;
+            margin-bottom:10px;
+            white-space:pre-line;
+        }
+
+        .meta{
+            display:flex;
+            flex-wrap:wrap;
+            gap:10px;
+            font-size:10px;
+            color:var(--muted);
+        }
+
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            padding:4px 8px;
+            border-radius:999px;
+            font-size:9px;
+            font-weight:700;
+            letter-spacing:0.02em;
+            white-space:nowrap;
+        }
+
+        .pill-normal{
+            background:#eff6ff;
+            color:#2563eb;
+        }
+
+        .pill-important{
+            background:#fff7ed;
+            color:var(--warning);
+        }
+
+        .pill-urgent{
+            background:#fef2f2;
+            color:var(--danger);
+        }
+
+        .pill-all{
+            background:#ecfdf5;
+            color:var(--success);
+        }
+
+        .pill-dept{
+            background:#f1f5f9;
+            color:#475569;
+        }
+
+        .empty-state{
+            text-align:center;
+            padding:36px 16px;
+            color:var(--muted);
+        }
+
+        .empty-state i{
+            font-size:30px;
+            margin-bottom:10px;
+            display:block;
+            color:#94a3b8;
+        }
+
+        .empty-state h5{
+            font-size:15px;
+            font-weight:700;
+            color:var(--text);
+            margin-bottom:4px;
+        }
+
+        .empty-state p{
+            font-size:11px;
+            margin:0;
+        }
+
+        @media (max-width: 768px){
+            body{
+                padding:12px;
+            }
+
+            .page-head{
+                flex-direction:column;
+                align-items:stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrap">
+    <div class="page-head">
+        <div>
+            <div class="page-title">Announcements</div>
+            <div class="subtext">View the latest company and department announcements.</div>
+        </div>
+
+        <div class="top-actions">
+            <a href="{% url 'employee_dashboard' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="section-card">
+        {% if announcements %}
+            <div class="row g-3">
+                {% for ann in announcements %}
+                    <div class="col-lg-6">
+                        <div class="announcement-card">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <div class="announcement-title">{{ ann.title }}</div>
+
+                                {% if ann.priority == "Urgent" %}
+                                    <span class="pill pill-urgent">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> Urgent
+                                    </span>
+                                {% elif ann.priority == "Important" %}
+                                    <span class="pill pill-important">
+                                        <i class="bi bi-star-fill"></i> Important
+                                    </span>
+                                {% else %}
+                                    <span class="pill pill-normal">
+                                        <i class="bi bi-info-circle-fill"></i> Normal
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="announcement-message">{{ ann.message }}</div>
+
+                            <div class="d-flex flex-wrap gap-2 mb-3">
+                                {% if ann.is_for_all %}
+                                    <span class="pill pill-all">
+                                        <i class="bi bi-people-fill"></i> For All
+                                    </span>
+                                {% else %}
+                                    <span class="pill pill-dept">
+                                        <i class="bi bi-building"></i>
+                                        {{ ann.department.name|default:"Department" }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="meta">
+                                <span><i class="bi bi-calendar3"></i> {{ ann.created_at|date:"d M Y, h:i A" }}</span>
+
+                                {% if ann.expiry_date %}
+                                    <span><i class="bi bi-hourglass-split"></i> Expires: {{ ann.expiry_date|date:"d M Y" }}</span>
+                                {% endif %}
+
+                                {% if ann.created_by %}
+                                    <span><i class="bi bi-person-circle"></i> {{ ann.created_by.employee_id }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-megaphone"></i>
+                <h5>No announcements available</h5>
+                <p>There are no active announcements right now.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

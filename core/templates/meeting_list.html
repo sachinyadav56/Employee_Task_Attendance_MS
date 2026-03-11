@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meetings | ETAMS</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
+    <style>
+        :root{
+            --bg:#f5f7fb;
+            --surface:#ffffff;
+            --border:#e5e7eb;
+            --text:#0f172a;
+            --muted:#64748b;
+            --primary:#4f46e5;
+            --success:#059669;
+            --danger:#dc2626;
+            --warning:#d97706;
+            --info:#2563eb;
+            --shadow:0 8px 22px rgba(15, 23, 42, 0.05);
+            --radius:12px;
+        }
+
+        *{
+            box-sizing:border-box;
+        }
+
+        body{
+            margin:0;
+            font-family:'Inter',sans-serif;
+            background:var(--bg);
+            color:var(--text);
+            font-size:11px;
+            padding:16px;
+        }
+
+        .page-wrap{
+            max-width:1100px;
+            margin:0 auto;
+        }
+
+        .page-head{
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:12px;
+            margin-bottom:14px;
+        }
+
+        .page-title{
+            font-size:18px;
+            font-weight:700;
+            margin-bottom:3px;
+            color:var(--text);
+        }
+
+        .subtext{
+            color:var(--muted);
+            font-size:11px;
+        }
+
+        .top-actions .btn{
+            border-radius:8px;
+            font-weight:600;
+            font-size:11px;
+            padding:7px 12px;
+        }
+
+        .section-card{
+            background:var(--surface);
+            border:1px solid var(--border);
+            border-radius:var(--radius);
+            box-shadow:var(--shadow);
+            padding:14px;
+        }
+
+        .meeting-card{
+            border:1px solid #e9eef5;
+            border-radius:10px;
+            padding:14px;
+            background:#fff;
+            height:100%;
+            transition:all 0.18s ease;
+        }
+
+        .meeting-card:hover{
+            background:#fbfdff;
+            box-shadow:0 6px 16px rgba(15,23,42,0.04);
+        }
+
+        .meeting-title{
+            font-size:13px;
+            font-weight:700;
+            margin-bottom:8px;
+            color:var(--text);
+            line-height:1.4;
+        }
+
+        .meeting-agenda{
+            font-size:11px;
+            color:#334155;
+            line-height:1.6;
+            margin-bottom:10px;
+            white-space:pre-line;
+        }
+
+        .meta-row{
+            display:flex;
+            align-items:flex-start;
+            gap:8px;
+            font-size:10px;
+            color:#475569;
+            margin-bottom:7px;
+            line-height:1.5;
+        }
+
+        .meta-row i{
+            color:var(--muted);
+            margin-top:2px;
+            font-size:11px;
+        }
+
+        .pill{
+            display:inline-flex;
+            align-items:center;
+            gap:5px;
+            padding:4px 8px;
+            border-radius:999px;
+            font-size:9px;
+            font-weight:700;
+            white-space:nowrap;
+        }
+
+        .pill-online{
+            background:#eff6ff;
+            color:var(--info);
+        }
+
+        .pill-offline{
+            background:#ecfdf5;
+            color:var(--success);
+        }
+
+        .pill-scheduled{
+            background:#fff7ed;
+            color:var(--warning);
+        }
+
+        .pill-completed{
+            background:#ecfdf5;
+            color:var(--success);
+        }
+
+        .pill-cancelled{
+            background:#fef2f2;
+            color:var(--danger);
+        }
+
+        .meeting-link{
+            text-decoration:none;
+            font-size:10px;
+            font-weight:600;
+            color:var(--primary);
+        }
+
+        .meeting-link:hover{
+            text-decoration:underline;
+        }
+
+        .empty-state{
+            text-align:center;
+            padding:36px 16px;
+            color:var(--muted);
+        }
+
+        .empty-state i{
+            font-size:30px;
+            margin-bottom:10px;
+            display:block;
+            color:#94a3b8;
+        }
+
+        .empty-state h5{
+            font-size:15px;
+            font-weight:700;
+            color:var(--text);
+            margin-bottom:4px;
+        }
+
+        .empty-state p{
+            font-size:11px;
+            margin:0;
+        }
+
+        @media (max-width: 768px){
+            body{
+                padding:12px;
+            }
+
+            .page-head{
+                flex-direction:column;
+                align-items:stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="page-wrap">
+    <div class="page-head">
+        <div>
+            <div class="page-title">Meetings</div>
+            <div class="subtext">Check your scheduled meetings and department events.</div>
+        </div>
+
+        <div class="top-actions">
+            <a href="{% url 'employee_dashboard' %}" class="btn btn-outline-primary">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+    </div>
+
+    <div class="section-card">
+        {% if meetings %}
+            <div class="row g-3">
+                {% for meeting in meetings %}
+                    <div class="col-lg-6">
+                        <div class="meeting-card">
+                            <div class="d-flex justify-content-between align-items-start gap-2 mb-2">
+                                <div class="meeting-title">{{ meeting.title }}</div>
+
+                                {% if meeting.status == "Completed" %}
+                                    <span class="pill pill-completed">
+                                        <i class="bi bi-check-circle-fill"></i> Completed
+                                    </span>
+                                {% elif meeting.status == "Cancelled" %}
+                                    <span class="pill pill-cancelled">
+                                        <i class="bi bi-x-circle-fill"></i> Cancelled
+                                    </span>
+                                {% else %}
+                                    <span class="pill pill-scheduled">
+                                        <i class="bi bi-clock-fill"></i> Scheduled
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="meeting-agenda">{{ meeting.agenda }}</div>
+
+                            <div class="meta-row">
+                                <i class="bi bi-calendar3"></i>
+                                <div>{{ meeting.date|date:"d M Y" }}</div>
+                            </div>
+
+                            <div class="meta-row">
+                                <i class="bi bi-clock-history"></i>
+                                <div>{{ meeting.start_time|time:"h:i A" }} - {{ meeting.end_time|time:"h:i A" }}</div>
+                            </div>
+
+                            {% if meeting.department %}
+                            <div class="meta-row">
+                                <i class="bi bi-building"></i>
+                                <div>{{ meeting.department.name }}</div>
+                            </div>
+                            {% endif %}
+
+                            {% if meeting.mode == "Online" %}
+                                <div class="meta-row">
+                                    <i class="bi bi-camera-video"></i>
+                                    <div>
+                                        <span class="pill pill-online mb-1">Online</span><br>
+                                        {% if meeting.meeting_link %}
+                                            <a href="{{ meeting.meeting_link }}" target="_blank" class="meeting-link">
+                                                Join Meeting
+                                            </a>
+                                        {% else %}
+                                            <span class="text-muted">Meeting link not available</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="meta-row">
+                                    <i class="bi bi-geo-alt"></i>
+                                    <div>
+                                        <span class="pill pill-offline mb-1">Offline</span><br>
+                                        {{ meeting.location|default:"Location not specified" }}
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <i class="bi bi-calendar-x"></i>
+                <h5>No meetings found</h5>
+                <p>There are no meetings assigned right now.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+</body>
+</html>

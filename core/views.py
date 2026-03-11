@@ -1,3 +1,4 @@
+from django.db import models
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.utils import timezone
@@ -5,11 +6,18 @@ from datetime import datetime, timedelta, date, time
 from django.views.decorators.http import require_POST
 from django.http import JsonResponse, HttpResponse
 from django.contrib.auth import logout
+from django.db.models import Q
 import csv
 
-from .models import Employee, Task, Attendance, Department, Role, BreakSession
-from .forms import EmployeeForm, TaskForm
-from .decorators import employee_login_required
+from .models import (
+    Employee, Task, Attendance, Department, Role, BreakSession,
+    Announcement, Meeting, ITReport
+)
+from .forms import (
+    EmployeeForm, TaskForm,
+    AnnouncementForm, MeetingForm, ITReportForm
+)
+from .decorators import employee_login_required, manager_required
 
 
 # -----------------------------
@@ -52,7 +60,9 @@ def admin_logout(request):
     return redirect("/admin")
 
 
+# -----------------------------
 # EMPLOYEE LOGIN
+# -----------------------------
 def employee_login(request):
     create_daily_absent_records()
 
@@ -146,6 +156,9 @@ def employee_login(request):
     })
 
 
+# -----------------------------
+# EMPLOYEE DASHBOARD
+# -----------------------------
 @employee_login_required
 def employee_dashboard(request):
     create_daily_absent_records()
@@ -211,11 +224,30 @@ def employee_dashboard(request):
         chart_break_hours.append(round(break_h, 2))
         chart_late_minutes.append(int(late_m))
 
+    # NEW: announcements and meetings for employee
+    today_now = timezone.localdate()
+
+    announcements = Announcement.objects.filter(is_active=True).filter(
+        Q(is_for_all=True) | Q(department=employee.department)
+    ).order_by("-created_at")
+
+    announcements = [
+        a for a in announcements
+        if not a.expiry_date or a.expiry_date >= today_now
+    ][:5]
+
+    upcoming_meetings = Meeting.objects.filter(
+        status="Scheduled",
+        date__gte=today_now
+    ).filter(
+        Q(department=employee.department) | Q(participants=employee)
+    ).distinct().order_by("date", "start_time")[:5]
+
     return render(request, 'dashboard.html', {
         'employee': employee,
         'attendance': attendance,
         'tasks': tasks,
-        'working_seconds': total_seconds,
+        'working_seconds': net_seconds if attendance and attendance.login_time else 0,
         'break_seconds': break_seconds,
         'late_display': late_display,
         'status': status,
@@ -226,9 +258,16 @@ def employee_dashboard(request):
         'chart_total_hours': chart_total_hours,
         'chart_break_hours': chart_break_hours,
         'chart_late_minutes': chart_late_minutes,
+
+        'announcements': announcements,
+        'upcoming_meetings': upcoming_meetings,
+         'is_manager': employee.is_manager(),
     })
 
 
+# -----------------------------
+# UPDATE TASK STATUS
+# -----------------------------
 @employee_login_required
 def update_task_status(request, task_id):
     task = get_object_or_404(Task, id=task_id, employee__id=request.session['employee_id'])
@@ -238,6 +277,9 @@ def update_task_status(request, task_id):
     return redirect('employee_dashboard')
 
 
+# -----------------------------
+# ASSIGN TASK VIEW
+# -----------------------------
 @employee_login_required
 def assign_task(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
@@ -254,6 +296,9 @@ def format_td(td):
     return f"{h:02d}h {m:02d}m {s:02d}s"
 
 
+# -----------------------------
+# EMPLOYEE LOGOUT
+# -----------------------------
 @employee_login_required
 def employee_logout(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
@@ -284,32 +329,50 @@ def employee_logout(request):
     for bs in attendance.break_sessions.all():
         if bs.end_at:
             total_break += bs.duration
+        else:
+            total_break += (timezone.now() - bs.start_at)
 
     net_work = total_work - total_break
     if net_work < timedelta():
         net_work = timedelta()
 
-    if total_work < timedelta(hours=8):
-        remaining = timedelta(hours=8) - total_work
+    # check net working hours
+    if net_work < timedelta(hours=8):
+        remaining = timedelta(hours=8) - net_work
         rem_sec = int(remaining.total_seconds())
         rh = rem_sec // 3600
         rm = (rem_sec % 3600) // 60
         rs = rem_sec % 60
-        messages.error(request, f"You can logout after 8 hours total time. Remaining: {rh:02d}:{rm:02d}:{rs:02d}")
+        messages.error(
+            request,
+            f"You can logout after 8 hours net working time. Remaining: {rh:02d}:{rm:02d}:{rs:02d}"
+        )
         return redirect('employee_dashboard')
 
-    attendance.logout_time = dt_logout.time()
+    attendance.logout_time = logout_time
     attendance.total_hours = total_work
     attendance.break_time = total_break
     attendance.net_working_hours = net_work
     attendance.status = "Present"
-    attendance.save()
+    attendance.is_on_break = False
+    attendance.break_started_at = None
+    attendance.save(update_fields=[
+        "logout_time",
+        "total_hours",
+        "break_time",
+        "net_working_hours",
+        "status",
+        "is_on_break",
+        "break_started_at",
+    ])
 
     request.session.flush()
     messages.success(request, "Logout successful. Have a great day!")
     return redirect('employee_login')
 
-
+# -----------------------------
+# ADD EMPLOYEE
+# -----------------------------
 def add_employee(request):
     if request.method == 'POST':
         form = EmployeeForm(request.POST)
@@ -324,6 +387,9 @@ def add_employee(request):
     return render(request, 'add_employee.html', {'emp_form': form})
 
 
+# -----------------------------
+# ATTENDANCE REPORT
+# -----------------------------
 @employee_login_required
 def attendance_report(request):
     create_daily_absent_records()
@@ -411,12 +477,18 @@ def attendance_report(request):
     })
 
 
+# -----------------------------
+# AJAX: GET ROLES
+# -----------------------------
 def get_roles(request):
     department_id = request.GET.get('department_id')
     roles = Role.objects.filter(department_id=department_id).values('id', 'name')
     return JsonResponse(list(roles), safe=False)
 
 
+# -----------------------------
+# START BREAK
+# -----------------------------
 @employee_login_required
 @require_POST
 def start_break(request):
@@ -438,6 +510,9 @@ def start_break(request):
     return JsonResponse({"ok": True})
 
 
+# -----------------------------
+# END BREAK
+# -----------------------------
 @employee_login_required
 @require_POST
 def end_break(request):
@@ -459,3 +534,161 @@ def end_break(request):
     attendance.save(update_fields=["is_on_break", "break_started_at"])
 
     return JsonResponse({"ok": True})
+
+
+# -----------------------------
+# EMPLOYEE: SUBMIT IT REPORT
+# -----------------------------
+@employee_login_required
+def submit_it_report(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+
+    if request.method == 'POST':
+        form = ITReportForm(request.POST)
+        if form.is_valid():
+            report = form.save(commit=False)
+            report.employee = employee
+            report.save()
+            messages.success(request, "IT report submitted successfully.")
+            return redirect('my_reports')
+    else:
+        form = ITReportForm()
+
+    return render(request, 'submit_report.html', {
+        'form': form,
+        'employee': employee
+    })
+
+
+# -----------------------------
+# EMPLOYEE: MY IT REPORTS
+# -----------------------------
+@employee_login_required
+def my_it_reports(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+    reports = ITReport.objects.filter(employee=employee)
+    return render(request, 'my_reports.html', {
+        'reports': reports,
+        'employee': employee
+    })
+
+
+# -----------------------------
+# MANAGEMENT DASHBOARD
+# -----------------------------
+@manager_required
+def management_dashboard(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+    today = timezone.localdate()
+
+    total_employees = Employee.objects.filter(is_active=True).count()
+    present_today = Attendance.objects.filter(date=today, status="Present").count()
+    absent_today = Attendance.objects.filter(date=today, status="Absent").count()
+    pending_tasks = Task.objects.filter(is_completed=False).count()
+    open_it_reports = ITReport.objects.filter(status__in=["Open", "In Progress"]).count()
+    upcoming_meetings = Meeting.objects.filter(status="Scheduled", date__gte=today).order_by("date", "start_time")[:5]
+    latest_announcements = Announcement.objects.filter(is_active=True).order_by("-created_at")[:5]
+
+    return render(request, 'management_dashboard.html', {
+        'employee': employee,
+        'total_employees': total_employees,
+        'present_today': present_today,
+        'absent_today': absent_today,
+        'pending_tasks': pending_tasks,
+        'open_it_reports': open_it_reports,
+        'upcoming_meetings': upcoming_meetings,
+        'latest_announcements': latest_announcements,
+    })
+
+
+@manager_required
+def add_announcement(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+
+    if request.method == 'POST':
+        form = AnnouncementForm(request.POST)
+        if form.is_valid():
+            announcement = form.save(commit=False)
+            announcement.created_by = employee
+            announcement.save()
+            messages.success(request, "Announcement created successfully.")
+            return redirect('announcement_list')
+    else:
+        form = AnnouncementForm()
+
+    return render(request, 'add_announcement.html', {'form': form})
+
+
+
+
+
+
+@manager_required
+def add_meeting(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+
+    if request.method == 'POST':
+        form = MeetingForm(request.POST)
+        if form.is_valid():
+            meeting = form.save(commit=False)
+            meeting.created_by = employee
+            meeting.save()
+            form.save_m2m()
+            messages.success(request, "Meeting scheduled successfully.")
+            return redirect('meeting_list')
+    else:
+        form = MeetingForm()
+
+    return render(request, 'add_meeting.html', {'form': form})
+
+
+# -----------------------------
+# MANAGEMENT: IT REPORTS
+# -----------------------------
+@manager_required
+def management_it_reports(request):
+    reports = ITReport.objects.all()
+    return render(request, 'management_it_reports.html', {'reports': reports})
+
+
+@manager_required
+def update_it_report_status(request, report_id):
+    report = get_object_or_404(ITReport, id=report_id)
+
+    if request.method == 'POST':
+        new_status = request.POST.get('status')
+        if new_status in ["Open", "In Progress", "Resolved", "Closed"]:
+            report.status = new_status
+            report.save(update_fields=["status", "updated_at"])
+            messages.success(request, "IT report status updated.")
+
+    return redirect('management_it_reports')
+
+
+
+@employee_login_required
+def announcement_list(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+
+    announcements = Announcement.objects.filter(
+        models.Q(is_for_all=True) | models.Q(department=employee.department),
+        is_active=True
+    ).order_by("-created_at")
+
+    return render(request, "announcement_list.html", {
+        "announcements": announcements
+    })
+
+
+@employee_login_required
+def meeting_list(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+
+    meetings = Meeting.objects.filter(
+        models.Q(participants=employee) | models.Q(department=employee.department)
+    ).distinct().order_by("date", "start_time")
+
+    return render(request, "meeting_list.html", {
+        "meetings": meetings
+    })
+    

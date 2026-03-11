@@ -37,9 +37,14 @@ class AnnouncementForm(forms.ModelForm):
         model = Announcement
         fields = ['title', 'message', 'priority', 'department', 'is_for_all', 'expiry_date', 'is_active']
         widgets = {
-            'expiry_date': forms.DateInput(attrs={'type': 'date'}),
+            'title': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter announcement title'}),
+            'message': forms.Textarea(attrs={'class': 'form-control', 'rows': 5, 'placeholder': 'Write announcement details'}),
+            'priority': forms.Select(attrs={'class': 'form-select'}),
+            'department': forms.Select(attrs={'class': 'form-select'}),
+            'expiry_date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'is_for_all': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
         }
-
 
 class MeetingForm(forms.ModelForm):
     class Meta:
@@ -49,12 +54,18 @@ class MeetingForm(forms.ModelForm):
             'mode', 'meeting_link', 'location', 'department', 'participants', 'status'
         ]
         widgets = {
-            'date': forms.DateInput(attrs={'type': 'date'}),
-            'start_time': forms.TimeInput(attrs={'type': 'time'}),
-            'end_time': forms.TimeInput(attrs={'type': 'time'}),
-            'participants': forms.SelectMultiple(attrs={'size': 8}),
+            'title': forms.TextInput(attrs={'class': 'form-control'}),
+            'agenda': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
+            'date': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
+            'start_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'end_time': forms.TimeInput(attrs={'type': 'time', 'class': 'form-control'}),
+            'mode': forms.Select(attrs={'class': 'form-select'}),
+            'meeting_link': forms.URLInput(attrs={'class': 'form-control', 'placeholder': 'https://meet.google.com/...'}),
+            'location': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Conference Room / Office'}),
+            'department': forms.Select(attrs={'class': 'form-select'}),
+            'participants': forms.SelectMultiple(attrs={'class': 'form-select', 'size': 8}),
+            'status': forms.Select(attrs={'class': 'form-select'}),
         }
-
 
 class ITReportForm(forms.ModelForm):
     class Meta:
