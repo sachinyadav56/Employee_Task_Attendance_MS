@@ -53,7 +53,15 @@
             font-weight:700;
             color:var(--primary);
             white-space:nowrap;
+            text-decoration:none;   /* remove underline */
         }
+
+
+.brand:hover{
+    text-decoration:none;   /* prevent underline on hover */
+    color:#2563eb;          /* keep same color */
+}
+
 
         .nav-links{
             display:flex;
@@ -194,16 +202,60 @@
                 width:100%;
             }
         }
+
+        .toast-container{
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast-message{
+    background: #16a34a;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 250px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    animation: slideIn 0.4s ease;
+}
+
+.toast-message.error{
+    background:#dc2626;
+}
+
+@keyframes slideIn{
+    from{
+        transform: translateX(100%);
+        opacity:0;
+    }
+    to{
+        transform: translateX(0);
+        opacity:1;
+    }
+}
     </style>
 </head>
 <body>
 
 <header class="topbar">
     <div class="brand">
-        <i class="bi bi-kanban-fill"></i> ETAMS Management
+
+         <a href="{% url 'management_dashboard' %}" class="brand">
+    <i class="bi bi-kanban-fill"></i> ETAMS Management
+</a>
+
     </div>
 
     <div class="nav-links">
+    
         <a href="{% url 'add_announcement' %}" class="nav-link-item active">
             <i class="bi bi-megaphone-fill"></i> Add Announcement
         </a>
@@ -213,12 +265,10 @@
         </a>
 
         <a href="{% url 'management_it_reports' %}" class="nav-link-item">
-            <i class="bi bi-life-preserver"></i> IT Reports
+            <i class="bi bi-life-preserver"></i> All Reports
         </a>
 
-        <a href="{% url 'employee_logout' %}" class="nav-link-item logout-link">
-            <i class="bi bi-box-arrow-right"></i> Logout
-        </a>
+        
     </div>
 </header>
 
@@ -226,11 +276,16 @@
     <div class="page-title">Add Announcement</div>
     <div class="subtext">Create a new announcement for all employees or for a selected department.</div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert alert-success">{{ message }}</div>
-        {% endfor %}
-    {% endif %}
+  {% if messages %}
+<div class="toast-container">
+    {% for message in messages %}
+    <div class="toast-message {{ message.tags }}">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
 
     <div class="form-card">
         <form method="POST">
@@ -291,6 +346,14 @@
         </form>
     </div>
 </main>
-
+<script>
+setTimeout(function(){
+    document.querySelectorAll(".toast-message").forEach(function(msg){
+        msg.style.opacity="0";
+        msg.style.transform="translateX(100%)";
+        setTimeout(()=>msg.remove(),500);
+    });
+},3000);
+</script>
 </body>
 </html>

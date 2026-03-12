@@ -52,7 +52,7 @@
             font-size:15px;
             font-weight:700;
             color:var(--primary);
-            margin-bottom:26px;
+            
             display:flex;
             align-items:center;
             gap:8px;
@@ -249,20 +249,31 @@
                 padding:16px;
             }
         }
+
+        .brand-link{
+    text-decoration: none;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.brand-link:hover{
+    text-decoration: none;
+    color: #2563eb;
+}
     </style>
 </head>
 <body>
 
     <aside class="sidebar">
         <div class="brand">
-            <i class="bi bi-kanban-fill"></i> ETAMS
-        </div>
-
-        <nav class="nav-menu">
-            <a href="{% url 'management_dashboard' %}" class="nav-item active">
-                <i class="bi bi-grid-1x2-fill"></i> Dashboard
-            </a>
-        </nav>
+    <a href="{% url 'employee_dashboard' %}" class="brand-link">
+        <i class="bi bi-kanban-fill"></i> ETAMS
+    </a>
+</div>
     </aside>
 
     <main class="content">
@@ -318,7 +329,7 @@
 
             <div class="col-lg-3 col-md-6 col-12">
                 <div class="stat-card">
-                    <div class="stat-label">Open IT Reports</div>
+                    <div class="stat-label">Submitted Reports</div>
                     <div class="stat-value" style="color:var(--info);">{{ open_it_reports }}</div>
                 </div>
             </div>

@@ -162,14 +162,17 @@
     </div>
 
     <div class="login-body">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-danger d-flex align-items: center;" role="alert">
-                    <i class="bi bi-exclamation-circle-fill me-2"></i>
-                    {{ message }}
-                </div>
-            {% endfor %}
+{% if messages %}
+    {% for message in messages %}
+        {% if 'error' in message.tags %}
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <i class="bi bi-exclamation-circle-fill me-2"></i>
+                {{ message }}
+            </div>
         {% endif %}
+    {% endfor %}
+{% endif %}
+
 
          {% if is_weekend_off %}
       <div class="alert alert-warning d-flex align-items-center" role="alert"

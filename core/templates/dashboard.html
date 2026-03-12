@@ -235,8 +235,57 @@ body{
     width:190px;
   }
 }
+
+.toast-container{
+    position: fixed;
+    top: 25px;
+    right: 25px;
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.toast-message{
+    background: #16a34a;
+    color: white;
+    padding: 12px 18px;
+    border-radius: 10px;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 250px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+    animation: slideIn 0.4s ease;
+}
+
+.toast-message.error{
+    background:#dc2626;
+}
+
+@keyframes slideIn{
+    from{
+        transform: translateX(100%);
+        opacity:0;
+    }
+    to{
+        transform: translateX(0);
+        opacity:1;
+    }
+}
 </style>
 </head>
+<script>
+setTimeout(function(){
+    document.querySelectorAll(".toast-message").forEach(function(msg){
+        msg.style.opacity="0";
+        msg.style.transform="translateX(100%)";
+        setTimeout(()=>msg.remove(),500);
+    });
+},3000);
+</script>
+</script>
 <body>
 
 <div class="topbar">
@@ -251,7 +300,16 @@ body{
       Dashboard
       <i class="bi bi-chevron-down"></i>
     </div>
-
+{% if messages %}
+<div class="toast-container">
+    {% for message in messages %}
+    <div class="toast-message {{ message.tags }}">
+        <i class="bi bi-check-circle-fill"></i>
+        <span>{{ message }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
     <div class="dropdown-menu-custom">
       <a href="{% url 'employee_dashboard' %}" class="dropdown-item-custom">
         <i class="bi bi-grid-1x2-fill"></i> Dashboard
@@ -274,7 +332,7 @@ body{
       </a>
 
       <a href="{% url 'submit_it_report' %}" class="dropdown-item-custom">
-        <i class="bi bi-life-preserver"></i> IT Report
+        <i class="bi bi-life-preserver"></i> Submit Report
       </a>
 
       <a href="{% url 'my_it_reports' %}" class="dropdown-item-custom">

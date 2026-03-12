@@ -247,7 +247,7 @@ def employee_dashboard(request):
         'employee': employee,
         'attendance': attendance,
         'tasks': tasks,
-        'working_seconds': net_seconds if attendance and attendance.login_time else 0,
+        'working_seconds': total_seconds,
         'break_seconds': break_seconds,
         'late_display': late_display,
         'status': status,
@@ -323,6 +323,7 @@ def employee_logout(request):
     dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
     dt_logout = timezone.make_aware(datetime.combine(date.today(), logout_time), tz)
 
+    # total time from login to logout (INCLUDING break time)
     total_work = dt_logout - dt_login
 
     total_break = timedelta()
@@ -336,16 +337,16 @@ def employee_logout(request):
     if net_work < timedelta():
         net_work = timedelta()
 
-    # check net working hours
-    if net_work < timedelta(hours=8):
-        remaining = timedelta(hours=8) - net_work
+    # check TOTAL time, not net working time
+    if total_work < timedelta(hours=8):
+        remaining = timedelta(hours=8) - total_work
         rem_sec = int(remaining.total_seconds())
         rh = rem_sec // 3600
         rm = (rem_sec % 3600) // 60
         rs = rem_sec % 60
         messages.error(
             request,
-            f"You can logout after 8 hours net working time. Remaining: {rh:02d}:{rm:02d}:{rs:02d}"
+            f"You can logout after 8 hours total time. Remaining: {rh:02d}:{rm:02d}:{rs:02d}"
         )
         return redirect('employee_dashboard')
 
@@ -550,7 +551,7 @@ def submit_it_report(request):
             report.employee = employee
             report.save()
             messages.success(request, "IT report submitted successfully.")
-            return redirect('my_reports')
+            return redirect('my_it_reports')
     else:
         form = ITReportForm()
 
@@ -567,7 +568,7 @@ def submit_it_report(request):
 def my_it_reports(request):
     employee = Employee.objects.get(id=request.session['employee_id'])
     reports = ITReport.objects.filter(employee=employee)
-    return render(request, 'my_reports.html', {
+    return render(request, 'my_it_reports.html', {
         'reports': reports,
         'employee': employee
     })
