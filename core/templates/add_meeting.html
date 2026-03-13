@@ -13,12 +13,17 @@
         :root{
             --bg:#f5f7fb;
             --surface:#ffffff;
+            --surface-soft:#fafbff;
             --border:#e5e7eb;
             --text:#0f172a;
             --muted:#64748b;
             --primary:#4f46e5;
+            --primary-dark:#4338ca;
             --danger:#dc2626;
+            --success:#16a34a;
+            --warning:#d97706;
             --shadow:0 8px 22px rgba(15,23,42,0.05);
+            --shadow-hover:0 12px 28px rgba(15,23,42,0.08);
             --radius:12px;
         }
 
@@ -29,13 +34,16 @@
         body{
             margin:0;
             font-family:'Inter',sans-serif;
-            background:var(--bg);
+            background:
+                radial-gradient(circle at top left, rgba(79,70,229,0.06), transparent 20%),
+                radial-gradient(circle at bottom right, rgba(37,99,235,0.05), transparent 20%),
+                var(--bg);
             color:var(--text);
             font-size:11px;
         }
 
         .topbar{
-            background:var(--surface);
+            background:rgba(255,255,255,0.92);
             border-bottom:1px solid var(--border);
             padding:12px 18px;
             display:flex;
@@ -43,6 +51,10 @@
             align-items:center;
             gap:12px;
             box-shadow:var(--shadow);
+            position:sticky;
+            top:0;
+            z-index:1000;
+            backdrop-filter:blur(10px);
         }
 
         .brand{
@@ -53,15 +65,13 @@
             font-weight:700;
             color:var(--primary);
             white-space:nowrap;
-            text-decoration:none;   /* remove underline */
+            text-decoration:none;
         }
 
         .brand:hover{
-    text-decoration:none;   /* prevent underline on hover */
-    color:#2563eb;          /* keep same color */
-}
-
-
+            text-decoration:none;
+            color:#2563eb;
+        }
 
         .nav-links{
             display:flex;
@@ -82,7 +92,7 @@
             text-decoration:none;
             font-size:11px;
             font-weight:600;
-            transition:0.18s ease;
+            transition:all 0.18s ease;
         }
 
         .nav-link-item:hover{
@@ -95,28 +105,74 @@
             background:var(--primary);
             color:#fff;
             border-color:var(--primary);
-        }
-
-        .logout-link{
-            color:var(--danger);
+            box-shadow:0 6px 16px rgba(79,70,229,0.16);
         }
 
         .page-wrap{
-            max-width:860px;
+            max-width:900px;
             margin:0 auto;
-            padding:20px 14px;
+            padding:20px 14px 28px;
+        }
+
+        .page-header{
+            background:rgba(255,255,255,0.88);
+            border:1px solid var(--border);
+            border-radius:16px;
+            box-shadow:var(--shadow);
+            padding:15px 16px;
+            margin-bottom:14px;
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .page-head-left{
+            display:flex;
+            align-items:flex-start;
+            gap:12px;
+        }
+
+        .page-icon{
+            width:40px;
+            height:40px;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg, var(--primary), #6366f1);
+            color:#fff;
+            font-size:14px;
+            box-shadow:0 8px 18px rgba(79,70,229,0.18);
+            flex-shrink:0;
         }
 
         .page-title{
             font-size:18px;
             font-weight:700;
-            margin-bottom:3px;
+            margin:0 0 3px;
         }
 
         .subtext{
             font-size:11px;
             color:var(--muted);
-            margin-bottom:14px;
+            margin:0;
+            line-height:1.5;
+        }
+
+        .page-chip{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:6px 10px;
+            background:#eef2ff;
+            border:1px solid #c7d2fe;
+            color:var(--primary);
+            border-radius:999px;
+            font-size:10px;
+            font-weight:700;
+            white-space:nowrap;
         }
 
         .form-card{
@@ -124,7 +180,52 @@
             border:1px solid var(--border);
             border-radius:var(--radius);
             box-shadow:var(--shadow);
+            overflow:hidden;
+        }
+
+        .form-card-top{
+            padding:13px 16px;
+            border-bottom:1px solid var(--border);
+            background:linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+        }
+
+        .form-card-title{
+            font-size:12px;
+            font-weight:700;
+            margin:0 0 2px;
+            color:var(--text);
+        }
+
+        .form-card-subtitle{
+            font-size:10px;
+            color:var(--muted);
+            margin:0;
+        }
+
+        .form-body{
             padding:16px;
+        }
+
+        .section-block{
+            margin-bottom:16px;
+            padding:12px;
+            background:var(--surface-soft);
+            border:1px solid #edf2f7;
+            border-radius:10px;
+        }
+
+        .section-block:last-of-type{
+            margin-bottom:0;
+        }
+
+        .section-heading{
+            font-size:11px;
+            font-weight:700;
+            color:var(--text);
+            margin-bottom:10px;
+            display:flex;
+            align-items:center;
+            gap:6px;
         }
 
         .form-label{
@@ -144,6 +245,8 @@
             padding:8px 10px !important;
             font-size:11px !important;
             box-shadow:none !important;
+            background:#fff !important;
+            transition:all 0.18s ease !important;
         }
 
         .form-control:focus,
@@ -153,6 +256,7 @@
         select:focus{
             border-color:var(--primary) !important;
             box-shadow:0 0 0 0.15rem rgba(79,70,229,0.08) !important;
+            background:#fff !important;
         }
 
         textarea{
@@ -161,13 +265,41 @@
         }
 
         select[multiple]{
-            min-height:150px;
+            min-height:170px;
+            padding:6px !important;
+        }
+
+        select[multiple] option{
+            padding:6px 8px;
+            border-radius:6px;
+            margin-bottom:2px;
         }
 
         .helper-text{
             font-size:10px;
             color:var(--muted);
             margin-top:4px;
+            line-height:1.45;
+        }
+
+        .info-note{
+            margin-top:12px;
+            padding:10px 12px;
+            border-radius:10px;
+            background:#f8fafc;
+            border:1px dashed #dbe3ee;
+            color:var(--muted);
+            font-size:10px;
+            line-height:1.5;
+        }
+
+        .btn-row{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-top:16px;
+            padding-top:14px;
+            border-top:1px solid #edf2f7;
         }
 
         .btn-modern{
@@ -177,11 +309,65 @@
             font-weight:600;
         }
 
-        .alert{
-            font-size:11px;
-            border-radius:8px;
-            padding:8px 10px;
-            margin-bottom:12px;
+        .btn-primary.btn-modern{
+            background:linear-gradient(135deg, var(--primary), #4338ca);
+            border:none;
+            box-shadow:0 8px 18px rgba(79,70,229,0.15);
+        }
+
+        .btn-primary.btn-modern:hover{
+            background:linear-gradient(135deg, var(--primary-dark), #3730a3);
+        }
+
+        .btn-outline-secondary.btn-modern{
+            border-color:#d1d5db;
+            color:#475569;
+            background:#fff;
+        }
+
+        .btn-outline-secondary.btn-modern:hover{
+            background:#f8fafc;
+            border-color:#cbd5e1;
+            color:#0f172a;
+        }
+
+        .toast-container{
+            position:fixed;
+            top:25px;
+            right:25px;
+            z-index:9999;
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+
+        .toast-message{
+            background:#16a34a;
+            color:white;
+            padding:12px 18px;
+            border-radius:10px;
+            font-size:14px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            min-width:250px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.15);
+            animation:slideIn 0.4s ease;
+        }
+
+        .toast-message.error{
+            background:#dc2626;
+        }
+
+        @keyframes slideIn{
+            from{
+                transform:translateX(100%);
+                opacity:0;
+            }
+            to{
+                transform:translateX(0);
+                opacity:1;
+            }
         }
 
         @media (max-width: 768px){
@@ -193,56 +379,30 @@
             .nav-links{
                 width:100%;
             }
+
+            .page-header{
+                align-items:flex-start;
+            }
+
+            .toast-container{
+                top:14px;
+                right:14px;
+                left:14px;
+            }
+
+            .toast-message{
+                min-width:auto;
+                width:100%;
+            }
         }
-
-        .toast-container{
-    position: fixed;
-    top: 25px;
-    right: 25px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.toast-message{
-    background: #16a34a;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 250px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    animation: slideIn 0.4s ease;
-}
-
-.toast-message.error{
-    background:#dc2626;
-}
-
-@keyframes slideIn{
-    from{
-        transform: translateX(100%);
-        opacity:0;
-    }
-    to{
-        transform: translateX(0);
-        opacity:1;
-    }
-}
     </style>
 </head>
 <body>
 
 <header class="topbar">
-    <div class="brand">
-        <a href="{% url 'management_dashboard' %}" class="brand">
-    <i class="bi bi-kanban-fill"></i> ETAMS Management
-</a>
-    </div>
+    <a href="{% url 'management_dashboard' %}" class="brand">
+        <i class="bi bi-kanban-fill"></i> ETAMS Management
+    </a>
 
     <div class="nav-links">
         <a href="{% url 'add_announcement' %}" class="nav-link-item">
@@ -256,16 +416,10 @@
         <a href="{% url 'management_it_reports' %}" class="nav-link-item">
             <i class="bi bi-life-preserver"></i> All Reports
         </a>
-
-       
     </div>
 </header>
 
-<main class="page-wrap">
-    <div class="page-title">Schedule Meeting</div>
-    <div class="subtext">Create and assign a meeting for departments or selected participants.</div>
-
-   {% if messages %}
+{% if messages %}
 <div class="toast-container">
     {% for message in messages %}
     <div class="toast-message {{ message.tags }}">
@@ -275,86 +429,145 @@
     {% endfor %}
 </div>
 {% endif %}
+
+<main class="page-wrap">
+    <div class="page-header">
+        <div class="page-head-left">
+            <div class="page-icon">
+                <i class="bi bi-calendar2-plus"></i>
+            </div>
+
+            <div>
+                <div class="page-title">Schedule Meeting</div>
+                <p class="subtext">Create and assign a meeting for departments or selected participants.</p>
+            </div>
+        </div>
+
+        <div class="page-chip">
+            <i class="bi bi-people-fill"></i> Meeting Planner
+        </div>
+    </div>
+
     <div class="form-card">
-        <form method="POST">
-            {% csrf_token %}
+        <div class="form-card-top">
+            <div class="form-card-title">Meeting Details</div>
+            <p class="form-card-subtitle">Add basic information, schedule, and participants for the meeting.</p>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Meeting Title</label>
-                {{ form.title }}
-            </div>
+        <div class="form-body">
+            <form method="POST">
+                {% csrf_token %}
 
-            <div class="mb-3">
-                <label class="form-label">Agenda</label>
-                {{ form.agenda }}
-            </div>
+                <div class="section-block">
+                    <div class="section-heading">
+                        <i class="bi bi-card-text"></i> Basic Information
+                    </div>
 
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Date</label>
-                    {{ form.date }}
+                    <div class="mb-3">
+                        <label class="form-label">Meeting Title</label>
+                        {{ form.title }}
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="form-label">Agenda</label>
+                        {{ form.agenda }}
+                    </div>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Start Time</label>
-                    {{ form.start_time }}
+                <div class="section-block">
+                    <div class="section-heading">
+                        <i class="bi bi-clock-history"></i> Schedule
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Date</label>
+                            {{ form.date }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Start Time</label>
+                            {{ form.start_time }}
+                        </div>
+
+                        <div class="col-md-4 mb-0">
+                            <label class="form-label">End Time</label>
+                            {{ form.end_time }}
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">End Time</label>
-                    {{ form.end_time }}
-                </div>
-            </div>
+                <div class="section-block">
+                    <div class="section-heading">
+                        <i class="bi bi-diagram-3"></i> Assignment & Mode
+                    </div>
 
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Mode</label>
-                    {{ form.mode }}
-                </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Mode</label>
+                            {{ form.mode }}
+                        </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Department</label>
-                    {{ form.department }}
-                </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Department</label>
+                            {{ form.department }}
+                        </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Status</label>
-                    {{ form.status }}
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Meeting Link</label>
-                    {{ form.meeting_link }}
-                    <div class="helper-text">Add link for online meetings.</div>
+                        <div class="col-md-4 mb-0">
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                        </div>
+                    </div>
                 </div>
 
-                <div class="col-md-6 mb-3">
-                    <label class="form-label">Location</label>
-                    {{ form.location }}
-                    <div class="helper-text">Add room or office location for offline meetings.</div>
+                <div class="section-block">
+                    <div class="section-heading">
+                        <i class="bi bi-geo-alt"></i> Meeting Access
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Meeting Link</label>
+                            {{ form.meeting_link }}
+                            <div class="helper-text">Use this for online meetings such as Google Meet or Zoom.</div>
+                        </div>
+
+                        <div class="col-md-6 mb-0">
+                            <label class="form-label">Location</label>
+                            {{ form.location }}
+                            <div class="helper-text">Use this for offline meetings like conference room or office cabin.</div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="mb-3">
-                <label class="form-label">Participants</label>
-                {{ form.participants }}
-                <div class="helper-text">Hold Ctrl or Cmd to select multiple participants.</div>
-            </div>
+                <div class="section-block">
+                    <div class="section-heading">
+                        <i class="bi bi-people"></i> Participants
+                    </div>
 
-            <div class="d-flex gap-2 mt-3">
-                <button type="submit" class="btn btn-primary btn-modern">
-                    <i class="bi bi-calendar-check"></i> Save Meeting
-                </button>
+                    <div class="mb-0">
+                        <label class="form-label">Select Participants</label>
+                        {{ form.participants }}
+                        <div class="helper-text">Hold Ctrl or Cmd to select multiple participants from the list.</div>
+                    </div>
+                </div>
 
-                <a href="{% url 'meeting_list' %}" class="btn btn-outline-secondary btn-modern">
-                    Cancel
-                </a>
-            </div>
-        </form>
+                
+
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-primary btn-modern">
+                        <i class="bi bi-calendar-check"></i> Save Meeting
+                    </button>
+
+                    <a href="{% url 'meeting_list' %}" class="btn btn-outline-secondary btn-modern">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </main>
+
 <script>
 setTimeout(function(){
     document.querySelectorAll(".toast-message").forEach(function(msg){

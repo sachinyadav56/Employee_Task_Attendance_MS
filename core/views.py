@@ -156,113 +156,6 @@ def employee_login(request):
     })
 
 
-# -----------------------------
-# EMPLOYEE DASHBOARD
-# -----------------------------
-@employee_login_required
-def employee_dashboard(request):
-    create_daily_absent_records()
-
-    employee = Employee.objects.get(id=request.session['employee_id'])
-
-    attendance = Attendance.objects.filter(employee=employee, date=date.today()).first()
-    tasks = Task.objects.filter(employee=employee).order_by('-assigned_date')
-
-    total_seconds = 0
-    break_seconds = 0
-    late_display = None
-    status = "Present"
-    is_on_break = False
-
-    if attendance and attendance.login_time:
-        tz = timezone.get_current_timezone()
-        now = timezone.localtime(timezone.now())
-        dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
-
-        office_start = timezone.make_aware(datetime.combine(date.today(), time(10, 10)), tz)
-        if dt_login > office_start:
-            late_seconds = int((dt_login - office_start).total_seconds())
-            h = late_seconds // 3600
-            m = (late_seconds % 3600) // 60
-            s = late_seconds % 60
-            late_display = f"{h:02d}:{m:02d}:{s:02d}"
-
-        total_break = timedelta()
-        sessions = attendance.break_sessions.all()
-        for bs in sessions:
-            if bs.end_at:
-                total_break += bs.duration
-            else:
-                total_break += (timezone.now() - bs.start_at)
-
-        break_seconds = int(total_break.total_seconds())
-        total_seconds = max(0, int((now - dt_login).total_seconds()))
-        net_seconds = max(0, total_seconds - break_seconds)
-
-        attendance.break_time = total_break
-        attendance.net_working_hours = timedelta(seconds=net_seconds)
-        attendance.total_hours = timedelta(seconds=total_seconds)
-        attendance.status = "Present"
-        attendance.save(update_fields=["break_time", "net_working_hours", "total_hours", "status"])
-
-        is_on_break = attendance.is_on_break
-
-    last7 = Attendance.objects.filter(employee=employee).order_by("-date")[:7]
-    last7 = list(reversed(last7))
-
-    chart_labels = []
-    chart_total_hours = []
-    chart_break_hours = []
-    chart_late_minutes = []
-
-    for r in last7:
-        chart_labels.append(r.date.strftime("%d-%b"))
-        total_h = (r.total_hours.total_seconds() if r.total_hours else 0) / 3600
-        break_h = (r.break_time.total_seconds() if r.break_time else 0) / 3600
-        late_m = (r.late_by.total_seconds() if r.late_by else 0) / 60
-        chart_total_hours.append(round(total_h, 2))
-        chart_break_hours.append(round(break_h, 2))
-        chart_late_minutes.append(int(late_m))
-
-    # NEW: announcements and meetings for employee
-    today_now = timezone.localdate()
-
-    announcements = Announcement.objects.filter(is_active=True).filter(
-        Q(is_for_all=True) | Q(department=employee.department)
-    ).order_by("-created_at")
-
-    announcements = [
-        a for a in announcements
-        if not a.expiry_date or a.expiry_date >= today_now
-    ][:5]
-
-    upcoming_meetings = Meeting.objects.filter(
-        status="Scheduled",
-        date__gte=today_now
-    ).filter(
-        Q(department=employee.department) | Q(participants=employee)
-    ).distinct().order_by("date", "start_time")[:5]
-
-    return render(request, 'dashboard.html', {
-        'employee': employee,
-        'attendance': attendance,
-        'tasks': tasks,
-        'working_seconds': total_seconds,
-        'break_seconds': break_seconds,
-        'late_display': late_display,
-        'status': status,
-        'is_on_break': is_on_break,
-        'target_seconds': 8 * 3600,
-
-        'chart_labels': chart_labels,
-        'chart_total_hours': chart_total_hours,
-        'chart_break_hours': chart_break_hours,
-        'chart_late_minutes': chart_late_minutes,
-
-        'announcements': announcements,
-        'upcoming_meetings': upcoming_meetings,
-         'is_manager': employee.is_manager(),
-    })
 
 
 # -----------------------------
@@ -370,6 +263,271 @@ def employee_logout(request):
     request.session.flush()
     messages.success(request, "Logout successful. Have a great day!")
     return redirect('employee_login')
+
+# -----------------------------
+# EMPLOYEE DASHBOARD
+# -----------------------------
+@employee_login_required
+def employee_dashboard(request):
+    create_daily_absent_records()
+
+    employee = Employee.objects.get(id=request.session['employee_id'])
+
+    attendance = Attendance.objects.filter(employee=employee, date=date.today()).first()
+    tasks = Task.objects.filter(employee=employee).order_by('-assigned_date')
+
+    total_seconds = 0
+    break_seconds = 0
+    late_display = None
+    status = "Present"
+    is_on_break = False
+
+    # NEW: break limit config
+    BREAK_LIMIT_SECONDS = 3600
+    break_limit_reached = False
+
+    if attendance and attendance.login_time:
+        tz = timezone.get_current_timezone()
+        now = timezone.localtime(timezone.now())
+        dt_login = timezone.make_aware(datetime.combine(date.today(), attendance.login_time), tz)
+
+        office_start = timezone.make_aware(datetime.combine(date.today(), time(10, 10)), tz)
+        if dt_login > office_start:
+            late_seconds = int((dt_login - office_start).total_seconds())
+            h = late_seconds // 3600
+            m = (late_seconds % 3600) // 60
+            s = late_seconds % 60
+            late_display = f"{h:02d}:{m:02d}:{s:02d}"
+
+        total_break = timedelta()
+        sessions = attendance.break_sessions.all().order_by("start_at")
+        for bs in sessions:
+            if bs.end_at:
+                total_break += bs.duration
+            else:
+                total_break += (timezone.now() - bs.start_at)
+
+        # NEW: if total break >= 1 hour, cap it and stop active break
+        if total_break >= timedelta(hours=1):
+            total_break = timedelta(hours=1)
+            break_limit_reached = True
+
+            if attendance.is_on_break:
+                open_bs = attendance.break_sessions.filter(end_at__isnull=True).order_by("-start_at").first()
+                if open_bs:
+                    used_break = timedelta()
+                    for old_bs in attendance.break_sessions.exclude(id=open_bs.id):
+                        if old_bs.end_at:
+                            used_break += old_bs.duration
+
+                    remaining_break = timedelta(hours=1) - used_break
+                    if remaining_break < timedelta():
+                        remaining_break = timedelta()
+
+                    forced_end = open_bs.start_at + remaining_break
+                    now_dt = timezone.now()
+
+                    if forced_end > now_dt:
+                        forced_end = now_dt
+                    if forced_end < open_bs.start_at:
+                        forced_end = open_bs.start_at
+
+                    open_bs.end_at = forced_end
+                    open_bs.duration = open_bs.end_at - open_bs.start_at
+                    open_bs.save(update_fields=["end_at", "duration"])
+
+                attendance.is_on_break = False
+                attendance.break_started_at = None
+                attendance.save(update_fields=["is_on_break", "break_started_at"])
+
+        break_seconds = int(total_break.total_seconds())
+        total_seconds = max(0, int((now - dt_login).total_seconds()))
+        net_seconds = max(0, total_seconds - break_seconds)
+
+        attendance.break_time = total_break
+        attendance.net_working_hours = timedelta(seconds=net_seconds)
+        attendance.total_hours = timedelta(seconds=total_seconds)
+        attendance.status = "Present"
+        attendance.save(update_fields=["break_time", "net_working_hours", "total_hours", "status"])
+
+        is_on_break = attendance.is_on_break
+
+    last7 = Attendance.objects.filter(employee=employee).order_by("-date")[:7]
+    last7 = list(reversed(last7))
+
+    chart_labels = []
+    chart_total_hours = []
+    chart_break_hours = []
+    chart_late_minutes = []
+
+    for r in last7:
+        chart_labels.append(r.date.strftime("%d-%b"))
+        total_h = (r.total_hours.total_seconds() if r.total_hours else 0) / 3600
+        break_h = (r.break_time.total_seconds() if r.break_time else 0) / 3600
+        late_m = (r.late_by.total_seconds() if r.late_by else 0) / 60
+        chart_total_hours.append(round(total_h, 2))
+        chart_break_hours.append(round(break_h, 2))
+        chart_late_minutes.append(int(late_m))
+
+    today_now = timezone.localdate()
+
+    announcements = Announcement.objects.filter(is_active=True).filter(
+        Q(is_for_all=True) | Q(department=employee.department)
+    ).order_by("-created_at")
+
+    announcements = [
+        a for a in announcements
+        if not a.expiry_date or a.expiry_date >= today_now
+    ][:5]
+
+    upcoming_meetings = Meeting.objects.filter(
+        status="Scheduled",
+        date__gte=today_now
+    ).filter(
+        Q(department=employee.department) | Q(participants=employee)
+    ).distinct().order_by("date", "start_time")[:5]
+
+    return render(request, 'dashboard.html', {
+        'employee': employee,
+        'attendance': attendance,
+        'tasks': tasks,
+        'working_seconds': total_seconds,  # total time including break
+        'break_seconds': break_seconds,
+        'late_display': late_display,
+        'status': status,
+        'is_on_break': is_on_break,
+        'target_seconds': 8 * 3600,
+
+        'chart_labels': chart_labels,
+        'chart_total_hours': chart_total_hours,
+        'chart_break_hours': chart_break_hours,
+        'chart_late_minutes': chart_late_minutes,
+
+        'announcements': announcements,
+        'upcoming_meetings': upcoming_meetings,
+        'is_manager': employee.is_manager(),
+
+        # NEW
+        'break_limit_seconds': BREAK_LIMIT_SECONDS,
+        'break_limit_reached': break_limit_reached,
+    })
+
+
+# -----------------------------
+# START BREAK
+# -----------------------------
+@employee_login_required
+@require_POST
+def start_break(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+    attendance = Attendance.objects.filter(employee=employee, date=date.today()).first()
+
+    if not attendance or not attendance.login_time:
+        return JsonResponse({"ok": False, "msg": "Login first."})
+
+    if attendance.is_on_break:
+        return JsonResponse({"ok": False, "msg": "Break already started."})
+
+    # NEW: total break limit = 1 hour
+    total_break = timedelta()
+    for bs in attendance.break_sessions.all():
+        if bs.end_at:
+            total_break += bs.duration
+        else:
+            total_break += (timezone.now() - bs.start_at)
+
+    if total_break >= timedelta(hours=1):
+        attendance.is_on_break = False
+        attendance.break_started_at = None
+        attendance.break_time = timedelta(hours=1)
+        attendance.save(update_fields=["is_on_break", "break_started_at", "break_time"])
+        return JsonResponse({"ok": False, "msg": "Break limit of 1 hour is completed."})
+
+    now = timezone.now()
+    BreakSession.objects.create(attendance=attendance, start_at=now)
+    attendance.is_on_break = True
+    attendance.break_started_at = now
+    attendance.save(update_fields=["is_on_break", "break_started_at"])
+
+    return JsonResponse({"ok": True})
+
+
+# -----------------------------
+# END BREAK
+# -----------------------------
+@employee_login_required
+@require_POST
+def end_break(request):
+    employee = Employee.objects.get(id=request.session['employee_id'])
+    attendance = Attendance.objects.filter(employee=employee, date=date.today()).first()
+
+    if not attendance or not attendance.login_time:
+        return JsonResponse({"ok": False, "msg": "Login first."})
+
+    # NEW: total break limit = 1 hour
+    total_break = timedelta()
+    for bs in attendance.break_sessions.all():
+        if bs.end_at:
+            total_break += bs.duration
+        else:
+            total_break += (timezone.now() - bs.start_at)
+
+    if total_break >= timedelta(hours=1):
+        open_bs = attendance.break_sessions.filter(end_at__isnull=True).order_by("-start_at").first()
+        if open_bs:
+            used_break = timedelta()
+            for old_bs in attendance.break_sessions.exclude(id=open_bs.id):
+                if old_bs.end_at:
+                    used_break += old_bs.duration
+
+            remaining_break = timedelta(hours=1) - used_break
+            if remaining_break < timedelta():
+                remaining_break = timedelta()
+
+            forced_end = open_bs.start_at + remaining_break
+            now_dt = timezone.now()
+
+            if forced_end > now_dt:
+                forced_end = now_dt
+            if forced_end < open_bs.start_at:
+                forced_end = open_bs.start_at
+
+            open_bs.end_at = forced_end
+            open_bs.duration = open_bs.end_at - open_bs.start_at
+            open_bs.save(update_fields=["end_at", "duration"])
+
+        attendance.is_on_break = False
+        attendance.break_started_at = None
+        attendance.break_time = timedelta(hours=1)
+        attendance.save(update_fields=["is_on_break", "break_started_at", "break_time"])
+        return JsonResponse({"ok": False, "msg": "Break limit of 1 hour is completed."})
+
+    if not attendance.is_on_break:
+        return JsonResponse({"ok": False, "msg": "Break is not running."})
+
+    bs = attendance.break_sessions.filter(end_at__isnull=True).order_by("-start_at").first()
+    if bs:
+        bs.close()
+
+    # NEW: if after closing the break reaches 1 hour, lock break actions
+    total_break = timedelta()
+    for item in attendance.break_sessions.all():
+        if item.end_at:
+            total_break += item.duration
+
+    if total_break > timedelta(hours=1):
+        total_break = timedelta(hours=1)
+
+    attendance.is_on_break = False
+    attendance.break_started_at = None
+    attendance.break_time = total_break
+    attendance.save(update_fields=["is_on_break", "break_started_at", "break_time"])
+
+    return JsonResponse({"ok": True})
+
+
+
+
 
 # -----------------------------
 # ADD EMPLOYEE
@@ -485,56 +643,6 @@ def get_roles(request):
     department_id = request.GET.get('department_id')
     roles = Role.objects.filter(department_id=department_id).values('id', 'name')
     return JsonResponse(list(roles), safe=False)
-
-
-# -----------------------------
-# START BREAK
-# -----------------------------
-@employee_login_required
-@require_POST
-def start_break(request):
-    employee = Employee.objects.get(id=request.session['employee_id'])
-    attendance = Attendance.objects.filter(employee=employee, date=date.today()).first()
-
-    if not attendance or not attendance.login_time:
-        return JsonResponse({"ok": False, "msg": "Login first."})
-
-    if attendance.is_on_break:
-        return JsonResponse({"ok": False, "msg": "Break already started."})
-
-    now = timezone.now()
-    BreakSession.objects.create(attendance=attendance, start_at=now)
-    attendance.is_on_break = True
-    attendance.break_started_at = now
-    attendance.save(update_fields=["is_on_break", "break_started_at"])
-
-    return JsonResponse({"ok": True})
-
-
-# -----------------------------
-# END BREAK
-# -----------------------------
-@employee_login_required
-@require_POST
-def end_break(request):
-    employee = Employee.objects.get(id=request.session['employee_id'])
-    attendance = Attendance.objects.filter(employee=employee, date=date.today()).first()
-
-    if not attendance or not attendance.login_time:
-        return JsonResponse({"ok": False, "msg": "Login first."})
-
-    if not attendance.is_on_break:
-        return JsonResponse({"ok": False, "msg": "Break is not running."})
-
-    bs = attendance.break_sessions.filter(end_at__isnull=True).order_by("-start_at").first()
-    if bs:
-        bs.close()
-
-    attendance.is_on_break = False
-    attendance.break_started_at = None
-    attendance.save(update_fields=["is_on_break", "break_started_at"])
-
-    return JsonResponse({"ok": True})
 
 
 # -----------------------------

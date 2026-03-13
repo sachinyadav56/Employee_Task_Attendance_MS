@@ -13,12 +13,16 @@
         :root{
             --bg:#f5f7fb;
             --surface:#ffffff;
+            --surface-soft:#fafbff;
             --border:#e5e7eb;
             --text:#0f172a;
             --muted:#64748b;
             --primary:#4f46e5;
             --danger:#dc2626;
+            --success:#16a34a;
+            --warning:#d97706;
             --shadow:0 8px 22px rgba(15,23,42,0.05);
+            --shadow-hover:0 12px 28px rgba(15,23,42,0.08);
             --radius:12px;
         }
 
@@ -29,13 +33,16 @@
         body{
             margin:0;
             font-family:'Inter',sans-serif;
-            background:var(--bg);
+            background:
+                radial-gradient(circle at top left, rgba(79,70,229,0.06), transparent 20%),
+                radial-gradient(circle at bottom right, rgba(37,99,235,0.05), transparent 20%),
+                var(--bg);
             color:var(--text);
             font-size:11px;
         }
 
         .topbar{
-            background:var(--surface);
+            background:rgba(255,255,255,0.92);
             border-bottom:1px solid var(--border);
             padding:12px 18px;
             display:flex;
@@ -43,6 +50,10 @@
             align-items:center;
             gap:12px;
             box-shadow:var(--shadow);
+            position:sticky;
+            top:0;
+            z-index:1000;
+            backdrop-filter:blur(10px);
         }
 
         .brand{
@@ -53,15 +64,13 @@
             font-weight:700;
             color:var(--primary);
             white-space:nowrap;
-            text-decoration:none;   /* remove underline */
+            text-decoration:none;
         }
 
-
-.brand:hover{
-    text-decoration:none;   /* prevent underline on hover */
-    color:#2563eb;          /* keep same color */
-}
-
+        .brand:hover{
+            text-decoration:none;
+            color:var(--primary);
+        }
 
         .nav-links{
             display:flex;
@@ -82,7 +91,7 @@
             text-decoration:none;
             font-size:11px;
             font-weight:600;
-            transition:0.18s ease;
+            transition:all 0.18s ease;
         }
 
         .nav-link-item:hover{
@@ -95,28 +104,74 @@
             background:var(--primary);
             color:#fff;
             border-color:var(--primary);
-        }
-
-        .logout-link{
-            color:var(--danger);
+            box-shadow:0 6px 16px rgba(79,70,229,0.16);
         }
 
         .page-wrap{
-            max-width:760px;
+            max-width:780px;
             margin:0 auto;
-            padding:20px 14px;
+            padding:20px 14px 28px;
+        }
+
+        .page-header{
+            background:rgba(255,255,255,0.88);
+            border:1px solid var(--border);
+            border-radius:16px;
+            box-shadow:var(--shadow);
+            padding:15px 16px;
+            margin-bottom:14px;
+            display:flex;
+            justify-content:space-between;
+            align-items:flex-start;
+            gap:12px;
+            flex-wrap:wrap;
+        }
+
+        .page-head-left{
+            display:flex;
+            align-items:flex-start;
+            gap:12px;
+        }
+
+        .page-icon{
+            width:40px;
+            height:40px;
+            border-radius:12px;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            background:linear-gradient(135deg, var(--primary), #6366f1);
+            color:#fff;
+            font-size:14px;
+            box-shadow:0 8px 18px rgba(79,70,229,0.18);
+            flex-shrink:0;
         }
 
         .page-title{
             font-size:18px;
             font-weight:700;
-            margin-bottom:3px;
+            margin:0 0 3px;
         }
 
         .subtext{
             font-size:11px;
             color:var(--muted);
-            margin-bottom:14px;
+            margin:0;
+            line-height:1.5;
+        }
+
+        .page-chip{
+            display:inline-flex;
+            align-items:center;
+            gap:6px;
+            padding:6px 10px;
+            background:#eef2ff;
+            border:1px solid #c7d2fe;
+            color:var(--primary);
+            border-radius:999px;
+            font-size:10px;
+            font-weight:700;
+            white-space:nowrap;
         }
 
         .form-card{
@@ -124,6 +179,29 @@
             border:1px solid var(--border);
             border-radius:var(--radius);
             box-shadow:var(--shadow);
+            overflow:hidden;
+        }
+
+        .form-card-top{
+            padding:13px 16px;
+            border-bottom:1px solid var(--border);
+            background:linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+        }
+
+        .form-card-title{
+            font-size:12px;
+            font-weight:700;
+            margin:0 0 2px;
+            color:var(--text);
+        }
+
+        .form-card-subtitle{
+            font-size:10px;
+            color:var(--muted);
+            margin:0;
+        }
+
+        .form-body{
             padding:16px;
         }
 
@@ -144,6 +222,8 @@
             padding:8px 10px !important;
             font-size:11px !important;
             box-shadow:none !important;
+            background:#fff !important;
+            transition:all 0.18s ease !important;
         }
 
         .form-control:focus,
@@ -153,6 +233,7 @@
         select:focus{
             border-color:var(--primary) !important;
             box-shadow:0 0 0 0.15rem rgba(79,70,229,0.08) !important;
+            background:#fff !important;
         }
 
         textarea{
@@ -160,11 +241,30 @@
             resize:vertical;
         }
 
+        .input-note{
+            margin-top:5px;
+            font-size:10px;
+            color:var(--muted);
+            line-height:1.4;
+        }
+
+        .field-block{
+            margin-bottom:14px;
+        }
+
+        .switch-card{
+            background:var(--surface-soft);
+            border:1px solid #edf2f7;
+            border-radius:10px;
+            padding:10px 12px;
+            height:100%;
+        }
+
         .form-check{
             display:flex;
             align-items:center;
             gap:7px;
-            margin-top:4px;
+            margin:0;
         }
 
         .form-check input{
@@ -178,6 +278,23 @@
             font-weight:500;
         }
 
+        .switch-note{
+            font-size:10px;
+            color:var(--muted);
+            margin-top:4px;
+            line-height:1.4;
+            padding-left:22px;
+        }
+
+        .btn-row{
+            display:flex;
+            gap:8px;
+            flex-wrap:wrap;
+            margin-top:16px;
+            padding-top:14px;
+            border-top:1px solid #edf2f7;
+        }
+
         .btn-modern{
             border-radius:8px;
             padding:8px 12px;
@@ -185,11 +302,61 @@
             font-weight:600;
         }
 
-        .alert{
-            font-size:11px;
-            border-radius:8px;
-            padding:8px 10px;
-            margin-bottom:12px;
+        .btn-primary.btn-modern{
+            background:linear-gradient(135deg, var(--primary), #4338ca);
+            border:none;
+            box-shadow:0 8px 18px rgba(79,70,229,0.15);
+        }
+
+        .btn-outline-secondary.btn-modern{
+            border-color:#d1d5db;
+            color:#475569;
+            background:#fff;
+        }
+
+        .btn-outline-secondary.btn-modern:hover{
+            background:#f8fafc;
+            border-color:#cbd5e1;
+            color:#0f172a;
+        }
+
+        .toast-container{
+            position:fixed;
+            top:25px;
+            right:25px;
+            z-index:9999;
+            display:flex;
+            flex-direction:column;
+            gap:10px;
+        }
+
+        .toast-message{
+            background:#16a34a;
+            color:white;
+            padding:12px 18px;
+            border-radius:10px;
+            font-size:14px;
+            display:flex;
+            align-items:center;
+            gap:10px;
+            min-width:250px;
+            box-shadow:0 8px 20px rgba(0,0,0,0.15);
+            animation:slideIn 0.4s ease;
+        }
+
+        .toast-message.error{
+            background:#dc2626;
+        }
+
+        @keyframes slideIn{
+            from{
+                transform:translateX(100%);
+                opacity:0;
+            }
+            to{
+                transform:translateX(0);
+                opacity:1;
+            }
         }
 
         @media (max-width: 768px){
@@ -201,61 +368,32 @@
             .nav-links{
                 width:100%;
             }
+
+            .page-header{
+                align-items:flex-start;
+            }
+
+            .toast-container{
+                top:14px;
+                right:14px;
+                left:14px;
+            }
+
+            .toast-message{
+                min-width:auto;
+                width:100%;
+            }
         }
-
-        .toast-container{
-    position: fixed;
-    top: 25px;
-    right: 25px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.toast-message{
-    background: #16a34a;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 250px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    animation: slideIn 0.4s ease;
-}
-
-.toast-message.error{
-    background:#dc2626;
-}
-
-@keyframes slideIn{
-    from{
-        transform: translateX(100%);
-        opacity:0;
-    }
-    to{
-        transform: translateX(0);
-        opacity:1;
-    }
-}
     </style>
 </head>
 <body>
 
 <header class="topbar">
-    <div class="brand">
-
-         <a href="{% url 'management_dashboard' %}" class="brand">
-    <i class="bi bi-kanban-fill"></i> ETAMS Management
-</a>
-
-    </div>
+    <a href="{% url 'management_dashboard' %}" class="brand">
+        <i class="bi bi-kanban-fill"></i> ETAMS Management
+    </a>
 
     <div class="nav-links">
-    
         <a href="{% url 'add_announcement' %}" class="nav-link-item active">
             <i class="bi bi-megaphone-fill"></i> Add Announcement
         </a>
@@ -267,16 +405,10 @@
         <a href="{% url 'management_it_reports' %}" class="nav-link-item">
             <i class="bi bi-life-preserver"></i> All Reports
         </a>
-
-        
     </div>
 </header>
 
-<main class="page-wrap">
-    <div class="page-title">Add Announcement</div>
-    <div class="subtext">Create a new announcement for all employees or for a selected department.</div>
-
-  {% if messages %}
+{% if messages %}
 <div class="toast-container">
     {% for message in messages %}
     <div class="toast-message {{ message.tags }}">
@@ -287,65 +419,100 @@
 </div>
 {% endif %}
 
+<main class="page-wrap">
+
+    <div class="page-header">
+        <div class="page-head-left">
+            <div class="page-icon">
+                <i class="bi bi-megaphone"></i>
+            </div>
+
+            <div>
+                <div class="page-title">Add Announcement</div>
+                <p class="subtext">Create a new announcement for all employees or for a selected department.</p>
+            </div>
+        </div>
+
+        <div class="page-chip">
+            <i class="bi bi-broadcast-pin"></i> Management Action
+        </div>
+    </div>
+
     <div class="form-card">
-        <form method="POST">
-            {% csrf_token %}
+        <div class="form-card-top">
+            <div class="form-card-title">Announcement Details</div>
+            <p class="form-card-subtitle">Fill all required information before publishing the announcement.</p>
+        </div>
 
-            <div class="mb-3">
-                <label class="form-label">Title</label>
-                {{ form.title }}
-            </div>
+        <div class="form-body">
+            <form method="POST">
+                {% csrf_token %}
 
-            <div class="mb-3">
-                <label class="form-label">Message</label>
-                {{ form.message }}
-            </div>
-
-            <div class="row">
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Priority</label>
-                    {{ form.priority }}
+                <div class="field-block">
+                    <label class="form-label">Title</label>
+                    {{ form.title }}
+                    <div class="input-note">Keep the title short and clear so employees can understand it quickly.</div>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Department</label>
-                    {{ form.department }}
+                <div class="field-block">
+                    <label class="form-label">Message</label>
+                    {{ form.message }}
+                    <div class="input-note">Write the complete message and include important instructions if needed.</div>
                 </div>
 
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Expiry Date</label>
-                    {{ form.expiry_date }}
-                </div>
-            </div>
+                <div class="row">
+                    <div class="col-md-4 field-block">
+                        <label class="form-label">Priority</label>
+                        {{ form.priority }}
+                    </div>
 
-            <div class="row">
-                <div class="col-md-6 mb-2">
-                    <div class="form-check">
-                        {{ form.is_for_all }}
-                        <label class="form-check-label">For all employees</label>
+                    <div class="col-md-4 field-block">
+                        <label class="form-label">Department</label>
+                        {{ form.department }}
+                    </div>
+
+                    <div class="col-md-4 field-block">
+                        <label class="form-label">Expiry Date</label>
+                        {{ form.expiry_date }}
                     </div>
                 </div>
 
-                <div class="col-md-6 mb-2">
-                    <div class="form-check">
-                        {{ form.is_active }}
-                        <label class="form-check-label">Active</label>
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="switch-card">
+                            <div class="form-check">
+                                {{ form.is_for_all }}
+                                <label class="form-check-label">For all employees</label>
+                            </div>
+                            <div class="switch-note">Enable this if the announcement should be visible to everyone.</div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-6">
+                        <div class="switch-card">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label">Active</label>
+                            </div>
+                            <div class="switch-note">Only active announcements will be shown to employees.</div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="d-flex gap-2 mt-3">
-                <button type="submit" class="btn btn-primary btn-modern">
-                    <i class="bi bi-check-circle"></i> Save
-                </button>
+                <div class="btn-row">
+                    <button type="submit" class="btn btn-primary btn-modern">
+                        <i class="bi bi-check-circle"></i> Save
+                    </button>
 
-                <a href="{% url 'announcement_list' %}" class="btn btn-outline-secondary btn-modern">
-                    Cancel
-                </a>
-            </div>
-        </form>
+                    <a href="{% url 'announcement_list' %}" class="btn btn-outline-secondary btn-modern">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </main>
+
 <script>
 setTimeout(function(){
     document.querySelectorAll(".toast-message").forEach(function(msg){
@@ -355,5 +522,6 @@ setTimeout(function(){
     });
 },3000);
 </script>
+
 </body>
 </html>

@@ -10,195 +10,255 @@
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
-    :root{
-        --bg:#f5f7fb;
-        --surface:#ffffff;
-        --border:#e5e7eb;
-        --text:#0f172a;
-        --muted:#64748b;
-        --primary:#4f46e5;
-        --danger:#dc2626;
-        --success:#059669;
-        --warning:#d97706;
-        --info:#2563eb;
-        --shadow:0 8px 22px rgba(15,23,42,0.05);
-        --radius:12px;
-    }
 
-    *{
-        box-sizing:border-box;
-    }
+:root{
+--bg:#f5f7fb;
+--surface:#ffffff;
+--border:#e5e7eb;
+--text:#0f172a;
+--muted:#64748b;
+--primary:#4f46e5;
+--success:#059669;
+--danger:#dc2626;
+--warning:#d97706;
+--info:#2563eb;
+--shadow:0 8px 22px rgba(15,23,42,0.05);
+--radius:12px;
+}
 
-    body{
-        margin:0;
-        font-family:'Inter',sans-serif;
-        background:var(--bg);
-        color:var(--text);
-        font-size:11px;
-    }
+*{
+box-sizing:border-box;
+}
 
-    .page-wrap{
-        max-width:1100px;
-        margin:0 auto;
-        padding:18px 14px;
-    }
+body{
+margin:0;
+font-family:'Inter',sans-serif;
+background:
+radial-gradient(circle at top left, rgba(79,70,229,0.06), transparent 22%),
+radial-gradient(circle at bottom right, rgba(37,99,235,0.05), transparent 22%),
+var(--bg);
+color:var(--text);
+font-size:11px;
+}
 
-    .top-row{
-        display:flex;
-        justify-content:space-between;
-        align-items:flex-start;
-        gap:12px;
-        margin-bottom:14px;
-    }
+.page-wrap{
+max-width:1100px;
+margin:0 auto;
+padding:18px 14px;
+}
 
-    .back-link{
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-        text-decoration:none;
-        color:var(--muted);
-        font-size:11px;
-        font-weight:500;
-        margin-bottom:6px;
-    }
+/* HEADER */
 
-    .back-link:hover{
-        color:var(--primary);
-    }
+.header-card{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:14px;
+box-shadow:var(--shadow);
+padding:14px 16px;
+margin-bottom:14px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:12px;
+flex-wrap:wrap;
+}
 
-    .page-title{
-        font-size:18px;
-        font-weight:700;
-        margin:0;
-    }
+.header-left{
+display:flex;
+align-items:center;
+gap:12px;
+}
 
-    .page-subtext{
-        font-size:11px;
-        color:var(--muted);
-        margin-top:3px;
-    }
+.icon-box{
+width:38px;
+height:38px;
+border-radius:10px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:linear-gradient(135deg,#4f46e5,#6366f1);
+color:#fff;
+font-size:14px;
+box-shadow:0 8px 18px rgba(79,70,229,0.18);
+}
 
-    .btn-modern{
-        border-radius:8px;
-        font-size:11px;
-        font-weight:600;
-        padding:8px 12px;
-        display:inline-flex;
-        align-items:center;
-        gap:6px;
-    }
+.back-link{
+display:inline-flex;
+align-items:center;
+gap:6px;
+text-decoration:none;
+color:var(--muted);
+font-size:11px;
+font-weight:500;
+}
 
-    .table-card{
-        background:var(--surface);
-        border:1px solid var(--border);
-        border-radius:var(--radius);
-        box-shadow:var(--shadow);
-        padding:14px;
-    }
+.back-link:hover{
+color:var(--primary);
+}
 
-    .table{
-        margin-bottom:0;
-    }
+.page-title{
+font-size:18px;
+font-weight:700;
+margin:2px 0 0;
+}
 
-    .table thead th{
-        font-size:10px;
-        text-transform:uppercase;
-        letter-spacing:.04em;
-        color:var(--muted);
-        font-weight:700;
-        border-bottom:1px solid var(--border);
-        padding:10px 12px;
-        white-space:nowrap;
-        background:#fafbfc;
-    }
+.page-subtext{
+font-size:11px;
+color:var(--muted);
+margin-top:3px;
+}
 
-    .table tbody td{
-        font-size:11px;
-        padding:10px 12px;
-        vertical-align:middle;
-        border-color:#edf2f7;
-    }
+.btn-modern{
+border-radius:8px;
+font-size:11px;
+font-weight:600;
+padding:8px 12px;
+display:inline-flex;
+align-items:center;
+gap:6px;
+}
 
-    .table tbody tr:hover{
-        background:#fbfdff;
-    }
+/* TABLE CARD */
 
-    .report-title{
-        font-size:11px;
-        font-weight:700;
-        color:var(--text);
-        margin-bottom:2px;
-    }
+.table-card{
+background:var(--surface);
+border:1px solid var(--border);
+border-radius:var(--radius);
+box-shadow:var(--shadow);
+overflow:hidden;
+}
 
-    .report-desc{
-        font-size:10px;
-        color:var(--muted);
-        line-height:1.45;
-    }
+.table-header{
+padding:12px 14px;
+border-bottom:1px solid var(--border);
+background:#fafbfc;
+font-size:12px;
+font-weight:700;
+color:#334155;
+}
 
-    .pill{
-        display:inline-flex;
-        align-items:center;
-        justify-content:center;
-        padding:4px 8px;
-        border-radius:999px;
-        font-size:9px;
-        font-weight:700;
-        white-space:nowrap;
-    }
+/* TABLE */
 
-    .status-open{
-        background:#fef2f2;
-        color:#dc2626;
-    }
+.table{
+margin-bottom:0;
+}
 
-    .status-progress{
-        background:#fff7ed;
-        color:#ea580c;
-    }
+.table thead th{
+font-size:10px;
+text-transform:uppercase;
+letter-spacing:.04em;
+color:var(--muted);
+font-weight:700;
+border-bottom:1px solid var(--border);
+padding:10px 12px;
+white-space:nowrap;
+background:#fafbfc;
+}
 
-    .status-resolved{
-        background:#ecfdf5;
-        color:#059669;
-    }
+.table tbody td{
+font-size:11px;
+padding:10px 12px;
+vertical-align:middle;
+border-color:#edf2f7;
+}
 
-    .status-closed{
-        background:#f1f5f9;
-        color:#475569;
-    }
+.table tbody tr{
+transition:background .15s ease;
+}
 
-    .priority-low{
-        background:#e0f2fe;
-        color:#0284c7;
-    }
+.table tbody tr:hover{
+background:#fbfdff;
+}
 
-    .priority-medium{
-        background:#fef9c3;
-        color:#a16207;
-    }
+/* REPORT TEXT */
 
-    .priority-high{
-        background:#fee2e2;
-        color:#b91c1c;
-    }
+.report-title{
+font-size:11px;
+font-weight:700;
+color:var(--text);
+margin-bottom:2px;
+}
 
-    .empty-row{
-        font-size:11px;
-        color:var(--muted);
-        text-align:center;
-        padding:18px 0;
-    }
+.report-desc{
+font-size:10px;
+color:var(--muted);
+line-height:1.45;
+}
 
-    @media (max-width: 768px){
-        .top-row{
-            flex-direction:column;
-            align-items:stretch;
-        }
+/* PILLS */
 
-        .page-wrap{
-            padding:14px 10px;
-        }
-    }
+.pill{
+display:inline-flex;
+align-items:center;
+justify-content:center;
+padding:4px 8px;
+border-radius:999px;
+font-size:9px;
+font-weight:700;
+white-space:nowrap;
+}
+
+/* STATUS */
+
+.status-open{
+background:#fef2f2;
+color:#dc2626;
+}
+
+.status-progress{
+background:#fff7ed;
+color:#ea580c;
+}
+
+.status-resolved{
+background:#ecfdf5;
+color:#059669;
+}
+
+.status-closed{
+background:#f1f5f9;
+color:#475569;
+}
+
+/* PRIORITY */
+
+.priority-low{
+background:#e0f2fe;
+color:#0284c7;
+}
+
+.priority-medium{
+background:#fef9c3;
+color:#a16207;
+}
+
+.priority-high{
+background:#fee2e2;
+color:#b91c1c;
+}
+
+/* EMPTY STATE */
+
+.empty-row{
+font-size:11px;
+color:var(--muted);
+text-align:center;
+padding:28px 0;
+}
+
+@media (max-width:768px){
+
+.header-card{
+flex-direction:column;
+align-items:flex-start;
+}
+
+.page-wrap{
+padding:14px 10px;
+}
+
+}
+
 </style>
 </head>
 
@@ -206,80 +266,109 @@
 
 <div class="page-wrap">
 
-    <div class="top-row">
-        <div>
-            <a href="{% url 'employee_dashboard' %}" class="back-link">
-                <i class="bi bi-arrow-left"></i> Back to Dashboard
-            </a>
-            <h1 class="page-title">My Reports</h1>
-            <div class="page-subtext">Track all submitted issues and their latest status.</div>
-        </div>
+<div class="header-card">
 
-        <div>
-            <a href="{% url 'submit_it_report' %}" class="btn btn-primary btn-modern">
-                <i class="bi bi-plus-circle"></i> New Report
-            </a>
-        </div>
-    </div>
+<div class="header-left">
 
-    <div class="table-card">
-        <div class="table-responsive">
-            <table class="table align-middle">
-                <thead>
-                    <tr>
-                        <th>Issue</th>
-                        <th>Type</th>
-                        <th>Priority</th>
-                        <th>Status</th>
-                        <th>Date</th>
-                    </tr>
-                </thead>
+<div class="icon-box">
+<i class="bi bi-bug-fill"></i>
+</div>
 
-                <tbody>
-                    {% for report in reports %}
-                    <tr>
-                        <td>
-                            <div class="report-title">{{ report.title }}</div>
-                            <div class="report-desc">{{ report.description|truncatechars:80 }}</div>
-                        </td>
+<div>
+<a href="{% url 'employee_dashboard' %}" class="back-link">
+<i class="bi bi-arrow-left"></i> Back to Dashboard
+</a>
 
-                        <td>{{ report.issue_type }}</td>
+<div class="page-title">My IT Reports</div>
+<div class="page-subtext">Track submitted issues and monitor their resolution status.</div>
+</div>
 
-                        <td>
-                            {% if report.priority == "High" %}
-                                <span class="pill priority-high">High</span>
-                            {% elif report.priority == "Medium" %}
-                                <span class="pill priority-medium">Medium</span>
-                            {% else %}
-                                <span class="pill priority-low">Low</span>
-                            {% endif %}
-                        </td>
+</div>
 
-                        <td>
-                            {% if report.status == "Open" %}
-                                <span class="pill status-open">Open</span>
-                            {% elif report.status == "In Progress" %}
-                                <span class="pill status-progress">In Progress</span>
-                            {% elif report.status == "Resolved" %}
-                                <span class="pill status-resolved">Resolved</span>
-                            {% else %}
-                                <span class="pill status-closed">Closed</span>
-                            {% endif %}
-                        </td>
+<a href="{% url 'submit_it_report' %}" class="btn btn-primary btn-modern">
+<i class="bi bi-plus-circle"></i> New Report
+</a>
 
-                        <td>{{ report.created_at|date:"d M Y" }}</td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" class="empty-row">
-                            No reports submitted yet
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
+</div>
+
+<div class="table-card">
+
+<div class="table-header">
+Submitted Issues
+</div>
+
+<div class="table-responsive">
+
+<table class="table align-middle">
+
+<thead>
+<tr>
+<th>Issue</th>
+<th>Type</th>
+<th>Priority</th>
+<th>Status</th>
+<th>Date</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for report in reports %}
+
+<tr>
+
+<td>
+<div class="report-title">{{ report.title }}</div>
+<div class="report-desc">{{ report.description|truncatechars:80 }}</div>
+</td>
+
+<td>{{ report.issue_type }}</td>
+
+<td>
+{% if report.priority == "High" %}
+<span class="pill priority-high">High</span>
+{% elif report.priority == "Medium" %}
+<span class="pill priority-medium">Medium</span>
+{% else %}
+<span class="pill priority-low">Low</span>
+{% endif %}
+</td>
+
+<td>
+{% if report.status == "Open" %}
+<span class="pill status-open">Open</span>
+
+{% elif report.status == "In Progress" %}
+<span class="pill status-progress">In Progress</span>
+
+{% elif report.status == "Resolved" %}
+<span class="pill status-resolved">Resolved</span>
+
+{% else %}
+<span class="pill status-closed">Closed</span>
+{% endif %}
+</td>
+
+<td>{{ report.created_at|date:"d M Y" }}</td>
+
+</tr>
+
+{% empty %}
+
+<tr>
+<td colspan="5" class="empty-row">
+No reports submitted yet
+</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+
+</div>
 
 </div>
 

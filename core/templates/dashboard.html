@@ -5,49 +5,81 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ETAMS | Dashboard</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
 <style>
 :root{
-  --bg:#f5f7fb;
-  --card:#ffffff;
-  --border:#e5e7eb;
+  --bg:#f4f7fb;
+  --bg-2:#eef4ff;
+  --card:rgba(255,255,255,0.88);
+  --border:#e2e8f0;
   --text:#0f172a;
   --muted:#64748b;
   --primary:#4f46e5;
+  --primary-dark:#4338ca;
   --danger:#dc2626;
   --success:#16a34a;
+  --warning:#ea580c;
+  --shadow-sm:0 8px 20px rgba(15,23,42,0.05);
+  --shadow-md:0 18px 45px rgba(15,23,42,0.08);
+  --radius-lg:18px;
+  --radius-xl:24px;
+}
+
+*{
+  box-sizing:border-box;
 }
 
 body{
   margin:0;
   font-family:'Inter',sans-serif;
-  background:var(--bg);
-  font-size:11px;
+  background:
+    radial-gradient(circle at top left, rgba(79,70,229,0.10), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(37,99,235,0.08), transparent 25%),
+    linear-gradient(135deg, var(--bg), var(--bg-2));
   color:var(--text);
+  min-height:100vh;
+  font-size:14px;
 }
 
+/* TOPBAR */
 .topbar{
-  background:#fff;
-  border-bottom:1px solid var(--border);
-  padding:10px 18px;
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
   position:sticky;
   top:0;
   z-index:1000;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 24px;
+  background:rgba(255,255,255,0.78);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid rgba(226,232,240,0.9);
+  box-shadow:0 4px 20px rgba(15,23,42,0.03);
 }
 
 .brand{
-  font-size:13px;
-  font-weight:600;
-  color:var(--primary);
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:10px;
+  font-size:18px;
+  font-weight:800;
+  color:var(--primary);
+  letter-spacing:0.2px;
+}
+
+.brand-icon{
+  width:38px;
+  height:38px;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  background:linear-gradient(135deg, var(--primary), #2563eb);
+  box-shadow:0 10px 20px rgba(79,70,229,0.22);
+  font-size:16px;
 }
 
 .corner-nav{
@@ -57,35 +89,40 @@ body{
 .corner-btn{
   display:flex;
   align-items:center;
-  gap:6px;
-  padding:6px 10px;
+  gap:8px;
+  padding:10px 14px;
   border:1px solid var(--border);
-  border-radius:8px;
+  border-radius:14px;
   background:#fff;
   color:var(--text);
   text-decoration:none;
-  font-size:11px;
+  font-size:13px;
   font-weight:600;
   cursor:pointer;
+  transition:all 0.25s ease;
+  box-shadow:var(--shadow-sm);
 }
 
 .corner-btn:hover{
   background:#f8fafc;
   color:var(--primary);
+  border-color:#cbd5e1;
+  transform:translateY(-1px);
 }
 
 .dropdown-menu-custom{
   position:absolute;
-  top:110%;
+  top:115%;
   right:0;
-  width:210px;
-  max-height:260px;
+  width:240px;
+  max-height:320px;
   overflow-y:auto;
-  background:#fff;
+  background:rgba(255,255,255,0.97);
+  backdrop-filter:blur(12px);
   border:1px solid var(--border);
-  border-radius:10px;
-  box-shadow:0 12px 30px rgba(15,23,42,0.08);
-  padding:6px;
+  border-radius:16px;
+  box-shadow:var(--shadow-md);
+  padding:8px;
   display:none;
 }
 
@@ -96,13 +133,14 @@ body{
 .dropdown-item-custom{
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:10px;
   text-decoration:none;
   color:#475569;
-  font-size:11px;
-  font-weight:500;
-  padding:8px 10px;
-  border-radius:8px;
+  font-size:13px;
+  font-weight:600;
+  padding:11px 12px;
+  border-radius:12px;
+  transition:all 0.2s ease;
 }
 
 .dropdown-item-custom:hover{
@@ -114,51 +152,97 @@ body{
   color:var(--danger);
 }
 
+.dropdown-item-custom.logout:hover{
+  background:#fef2f2;
+  color:var(--danger);
+}
+
+/* PAGE */
 .container-area{
-  padding:20px 28px;
+  max-width:1200px;
+  margin:0 auto;
+  padding:32px 24px 40px;
 }
 
 .page-head{
   display:flex;
   justify-content:space-between;
-  align-items:center;
-  margin-bottom:14px;
+  align-items:flex-start;
+  gap:18px;
+  margin-bottom:22px;
+  flex-wrap:wrap;
 }
 
 .page-title{
-  font-size:16px;
-  font-weight:600;
-  margin-bottom:2px;
+  font-size:28px;
+  font-weight:800;
+  margin-bottom:6px;
+  letter-spacing:-0.5px;
 }
 
 .subtext{
   color:var(--muted);
-  font-size:10px;
+  font-size:14px;
 }
 
 .status-badge{
   background:#ecfdf5;
   color:var(--success);
   border:1px solid #bbf7d0;
-  font-size:10px;
-  padding:4px 8px;
+  font-size:12px;
+  padding:8px 14px;
   border-radius:999px;
-  font-weight:600;
+  font-weight:700;
+  box-shadow:var(--shadow-sm);
 }
 
-.dashboard-card{
-  max-width:720px;
+/* MAIN GRID */
+.dashboard-grid{
+  display:grid;
+  grid-template-columns: 1.6fr 1fr;
+  gap:22px;
+}
+
+.dashboard-card,
+.side-card{
   background:var(--card);
-  border:1px solid var(--border);
-  border-radius:12px;
-  box-shadow:0 8px 24px rgba(15,23,42,0.04);
+  border:1px solid rgba(226,232,240,0.9);
+  border-radius:var(--radius-xl);
+  box-shadow:var(--shadow-md);
+  backdrop-filter:blur(12px);
   overflow:hidden;
+}
+
+.card-header-modern{
+  padding:22px 22px 14px;
+  border-bottom:1px solid rgba(226,232,240,0.7);
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  gap:10px;
+}
+
+.card-title-modern{
+  font-size:17px;
+  font-weight:700;
+  margin:0;
+}
+
+.card-subtitle{
+  color:var(--muted);
+  font-size:13px;
+  margin-top:4px;
+}
+
+.card-body-modern{
+  padding:0;
 }
 
 .card-row{
   display:grid;
   grid-template-columns:1fr 1fr;
-  border-bottom:1px solid var(--border);
+  border-bottom:1px solid rgba(226,232,240,0.8);
 }
 
 .card-row:last-child{
@@ -166,60 +250,233 @@ body{
 }
 
 .cell{
-  padding:16px 18px;
+  padding:22px;
 }
 
 .cell:first-child{
-  border-right:1px solid var(--border);
+  border-right:1px solid rgba(226,232,240,0.8);
 }
 
 .label{
-  font-size:9px;
+  font-size:11px;
   text-transform:uppercase;
-  letter-spacing:.06em;
+  letter-spacing:.08em;
   color:var(--muted);
-  font-weight:700;
-  margin-bottom:6px;
+  font-weight:800;
+  margin-bottom:10px;
 }
 
 .value{
-  font-size:12px;
-  font-weight:600;
+  font-size:16px;
+  font-weight:700;
+  color:var(--text);
+}
+
+/* TIMERS */
+.timer-box{
+  background:linear-gradient(135deg, #f8fafc, #eef2ff);
+  border:1px solid #dbeafe;
+  border-radius:18px;
+  padding:18px 16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.8);
 }
 
 .timer{
-  font-size:20px;
+  font-size:30px;
   font-family:monospace;
-  font-weight:700;
+  font-weight:800;
+  line-height:1;
+  letter-spacing:1px;
+}
+
+.timer.work{
+  color:#2563eb;
+}
+
+.timer.break{
+  color:#475569;
 }
 
 .break-controls{
   display:flex;
-  gap:6px;
-  margin-top:10px;
+  gap:10px;
+  margin-top:14px;
+  flex-wrap:wrap;
 }
 
 .break-btn{
   border:none;
-  border-radius:6px;
-  padding:5px 10px;
-  font-size:10px;
-  font-weight:600;
+  border-radius:12px;
+  padding:10px 16px;
+  font-size:13px;
+  font-weight:700;
   color:#fff;
+  transition:all 0.22s ease;
+  box-shadow:0 10px 20px rgba(15,23,42,0.10);
 }
 
-.start-break{ background:#2563eb; }
-.end-break{ background:#16a34a; }
+.break-btn:hover{
+  transform:translateY(-1px);
+}
 
+.start-break{
+  background:linear-gradient(135deg, #2563eb, #1d4ed8);
+}
+
+.end-break{
+  background:linear-gradient(135deg, #16a34a, #15803d);
+}
+
+.break-btn:disabled{
+  opacity:0.55 !important;
+  cursor:not-allowed !important;
+  transform:none;
+  box-shadow:none;
+}
+
+/* NOTE */
 .note{
-  padding:10px 16px;
-  font-size:10px;
+  padding:16px 22px 22px;
+  font-size:13px;
   color:var(--muted);
+  background:#fcfcfd;
+  border-top:1px solid rgba(226,232,240,0.7);
+}
+
+/* SIDEBAR CARDS */
+.side-card{
+  padding:22px;
+}
+
+.quick-stat{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:#fff;
+  margin-bottom:14px;
+  box-shadow:var(--shadow-sm);
+}
+
+.quick-stat:last-child{
+  margin-bottom:0;
+}
+
+.quick-icon{
+  width:46px;
+  height:46px;
+  border-radius:14px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  color:#fff;
+  flex-shrink:0;
+}
+
+.quick-icon.primary{
+  background:linear-gradient(135deg, #4f46e5, #2563eb);
+}
+
+.quick-icon.success{
+  background:linear-gradient(135deg, #16a34a, #22c55e);
+}
+
+.quick-icon.warning{
+  background:linear-gradient(135deg, #f59e0b, #ea580c);
+}
+
+.quick-label{
+  font-size:12px;
+  color:var(--muted);
+  font-weight:600;
+  margin-bottom:4px;
+}
+
+.quick-value{
+  font-size:16px;
+  font-weight:800;
+  color:var(--text);
+}
+
+.info-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 12px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:700;
+  background:#eef2ff;
+  color:var(--primary);
+  margin-top:10px;
+}
+
+/* TOAST */
+.toast-container{
+  position:fixed;
+  top:24px;
+  right:24px;
+  z-index:9999;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.toast-message{
+  background:linear-gradient(135deg, #16a34a, #15803d);
+  color:white;
+  padding:14px 18px;
+  border-radius:14px;
+  font-size:14px;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:280px;
+  box-shadow:0 18px 35px rgba(0,0,0,0.15);
+  animation:slideIn 0.4s ease;
+  font-weight:600;
+}
+
+.toast-message.error{
+  background:linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+@keyframes slideIn{
+  from{
+    transform:translateX(100%);
+    opacity:0;
+  }
+  to{
+    transform:translateX(0);
+    opacity:1;
+  }
+}
+
+/* MOBILE */
+@media (max-width: 992px){
+  .dashboard-grid{
+    grid-template-columns:1fr;
+  }
 }
 
 @media (max-width: 768px){
+  .topbar{
+    padding:12px 14px;
+  }
+
+  .brand{
+    font-size:16px;
+  }
+
   .container-area{
-    padding:14px;
+    padding:20px 14px 30px;
+  }
+
+  .page-title{
+    font-size:24px;
   }
 
   .card-row{
@@ -228,78 +485,32 @@ body{
 
   .cell:first-child{
     border-right:none;
-    border-bottom:1px solid var(--border);
+    border-bottom:1px solid rgba(226,232,240,0.8);
   }
 
   .dropdown-menu-custom{
-    width:190px;
+    width:210px;
   }
-}
 
-.toast-container{
-    position: fixed;
-    top: 25px;
-    right: 25px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
+  .timer{
+    font-size:24px;
+  }
 
-.toast-message{
-    background: #16a34a;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 250px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    animation: slideIn 0.4s ease;
-}
+  .toast-container{
+    top:15px;
+    right:15px;
+    left:15px;
+  }
 
-.toast-message.error{
-    background:#dc2626;
-}
-
-@keyframes slideIn{
-    from{
-        transform: translateX(100%);
-        opacity:0;
-    }
-    to{
-        transform: translateX(0);
-        opacity:1;
-    }
+  .toast-message{
+    min-width:auto;
+    width:100%;
+  }
 }
 </style>
 </head>
-<script>
-setTimeout(function(){
-    document.querySelectorAll(".toast-message").forEach(function(msg){
-        msg.style.opacity="0";
-        msg.style.transform="translateX(100%)";
-        setTimeout(()=>msg.remove(),500);
-    });
-},3000);
-</script>
-</script>
 <body>
 
-<div class="topbar">
-  <div class="brand">
-    <i class="bi bi-hexagon-fill"></i>
-    ETAMS
-  </div>
-
-  <div class="corner-nav">
-    <div class="corner-btn">
-      <i class="bi bi-grid-1x2-fill"></i>
-      Dashboard
-      <i class="bi bi-chevron-down"></i>
-    </div>
 {% if messages %}
 <div class="toast-container">
     {% for message in messages %}
@@ -310,6 +521,22 @@ setTimeout(function(){
     {% endfor %}
 </div>
 {% endif %}
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-icon">
+      <i class="bi bi-hexagon-fill"></i>
+    </div>
+    ETAMS
+  </div>
+
+  <div class="corner-nav">
+    <div class="corner-btn">
+      <i class="bi bi-grid-1x2-fill"></i>
+      Dashboard
+      <i class="bi bi-chevron-down"></i>
+    </div>
+
     <div class="dropdown-menu-custom">
       <a href="{% url 'employee_dashboard' %}" class="dropdown-item-custom">
         <i class="bi bi-grid-1x2-fill"></i> Dashboard
@@ -356,59 +583,141 @@ setTimeout(function(){
   <div class="page-head">
     <div>
       <div class="page-title">Employee Dashboard</div>
-      <div class="subtext">Employee ID: {{ employee.employee_id }}</div>
+      <div class="subtext">Welcome back · Employee ID: {{ employee.employee_id }}</div>
     </div>
 
     <div class="status-badge" id="sessionBadgeText">Active Session</div>
   </div>
 
-  <div class="dashboard-card">
-    <div class="card-row">
-      <div class="cell">
-        <div class="label">Department</div>
-        <div class="value">{{ employee.department.name }}</div>
+  <div class="dashboard-grid">
+    <!-- Main Card -->
+    <div class="dashboard-card">
+      <div class="card-header-modern">
+        <div>
+          <h3 class="card-title-modern mb-0">Today's Work Summary</h3>
+          <div class="card-subtitle">Track your login, working hours, and break activity</div>
+        </div>
+        <div class="info-chip">
+          <i class="bi bi-shield-check"></i> Live Status
+        </div>
       </div>
 
-      <div class="cell">
-        <div class="label">Designation</div>
-        <div class="value">{{ employee.role }}</div>
+      <div class="card-body-modern">
+        <div class="card-row">
+          <div class="cell">
+            <div class="label">Department</div>
+            <div class="value">{{ employee.department.name }}</div>
+          </div>
+
+          <div class="cell">
+            <div class="label">Designation</div>
+            <div class="value">{{ employee.role }}</div>
+          </div>
+        </div>
+
+        <div class="card-row">
+          <div class="cell">
+            <div class="label">Login Time</div>
+            <div class="value">{{ attendance.login_time|time:"h:i A"|default:"--" }}</div>
+          </div>
+
+          <div class="cell">
+            <div class="label">Delay Log</div>
+            <div class="value" style="color: var(--danger);">
+              {% if late_display %}{{ late_display }}{% else %}00:00:00{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="card-row">
+          <div class="cell">
+            <div class="label">Total Working Time</div>
+            <div class="timer-box">
+              <div class="timer work" id="workTimer">00:00:00</div>
+            </div>
+          </div>
+
+          <div class="cell">
+            <div class="label">Break Time</div>
+            <div class="timer-box">
+              <div class="timer break" id="breakTimer">00:00:00</div>
+            </div>
+
+            <div class="break-controls">
+              <button class="break-btn start-break" id="startBreakBtn">
+                <i class="bi bi-pause-circle me-1"></i> Start Break
+              </button>
+              <button class="break-btn end-break" id="endBreakBtn">
+                <i class="bi bi-play-circle me-1"></i> End Break
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" id="hintText">
+        Logout will be enabled after you complete 8 hours of total time.
       </div>
     </div>
 
-    <div class="card-row">
-      <div class="cell">
-        <div class="label">Login Time</div>
-        <div class="value">{{ attendance.login_time|time:"h:i A"|default:"--" }}</div>
+    <!-- Side Cards -->
+    <div>
+      <div class="side-card mb-3">
+        <h3 class="card-title-modern mb-3">Session Overview</h3>
+
+        <div class="quick-stat">
+          <div class="quick-icon primary">
+            <i class="bi bi-person-badge"></i>
+          </div>
+          <div>
+            <div class="quick-label">Employee ID</div>
+            <div class="quick-value">{{ employee.employee_id }}</div>
+          </div>
+        </div>
+
+        <div class="quick-stat">
+          <div class="quick-icon success">
+            <i class="bi bi-clock-history"></i>
+          </div>
+          <div>
+            <div class="quick-label">Target Hours</div>
+            <div class="quick-value">08:00:00</div>
+          </div>
+        </div>
+
+        <div class="quick-stat">
+          <div class="quick-icon warning">
+            <i class="bi bi-cup-hot"></i>
+          </div>
+          <div>
+            <div class="quick-label">Break Limit</div>
+            <div class="quick-value">01:00:00</div>
+          </div>
+        </div>
       </div>
 
-      <div class="cell">
-        <div class="label">Delay Log</div>
-        <div class="value text-danger">{% if late_display %}{{ late_display }}{% else %}00:00:00{% endif %}</div>
-      </div>
-    </div>
-
-    <div class="card-row">
-      <div class="cell">
-        <div class="label">Net Working Time</div>
-        <div class="timer text-primary" id="workTimer">00:00:00</div>
-      </div>
-
-      <div class="cell">
-        <div class="label">Break Time</div>
-        <div class="timer text-secondary" id="breakTimer">00:00:00</div>
-
-        <div class="break-controls">
-          <button class="break-btn start-break" id="startBreakBtn">Start</button>
-          <button class="break-btn end-break" id="endBreakBtn">End</button>
+      <div class="side-card">
+        <h3 class="card-title-modern mb-2">Quick Notes</h3>
+        <div class="subtext" style="line-height:1.7;">
+          Use the break buttons to manage your session correctly. Logout becomes available only after completing the required work duration.
+        </div>
+        <div class="info-chip">
+          <i class="bi bi-info-circle"></i> Attendance monitored live
         </div>
       </div>
     </div>
-
-    <div class="note" id="hintText">
-      Logout will be enabled after you complete 8 hours of net working time.
-    </div>
   </div>
 </div>
+
+<script>
+setTimeout(function(){
+    document.querySelectorAll(".toast-message").forEach(function(msg){
+        msg.style.opacity = "0";
+        msg.style.transform = "translateX(100%)";
+        setTimeout(() => msg.remove(), 500);
+    });
+}, 3000);
+</script>
 
 <script>
   const workTimer = document.getElementById("workTimer");
@@ -426,6 +735,9 @@ setTimeout(function(){
   let isOnBreak = {{ is_on_break|yesno:"true,false" }};
   const TARGET_SECONDS = {{ target_seconds|default:28800 }};
 
+  let breakLimitReached = {{ break_limit_reached|yesno:"true,false" }};
+  const BREAK_LIMIT_SECONDS = {{ break_limit_seconds|default:3600 }};
+
   function formatTime(sec) {
     sec = Math.max(0, sec);
     const h = Math.floor(sec / 3600);
@@ -435,14 +747,36 @@ setTimeout(function(){
   }
 
   function updateButtons() {
+    if (breakLimitReached) {
+      startBreakBtn.disabled = true;
+      endBreakBtn.disabled = true;
+      return;
+    }
+
     startBreakBtn.disabled = isOnBreak;
     endBreakBtn.disabled = !isOnBreak;
-    startBreakBtn.style.opacity = isOnBreak ? "0.6" : "1";
-    endBreakBtn.style.opacity = !isOnBreak ? "0.6" : "1";
   }
 
   function updateSessionBadge() {
-    sessionBadgeText.innerText = isOnBreak ? "On Break" : "Active Session";
+    if (breakLimitReached) {
+      sessionBadgeText.innerText = "Break Limit Reached";
+      sessionBadgeText.style.background = "#fff7ed";
+      sessionBadgeText.style.color = "#c2410c";
+      sessionBadgeText.style.borderColor = "#fed7aa";
+      return;
+    }
+
+    if (isOnBreak) {
+      sessionBadgeText.innerText = "On Break";
+      sessionBadgeText.style.background = "#eff6ff";
+      sessionBadgeText.style.color = "#2563eb";
+      sessionBadgeText.style.borderColor = "#bfdbfe";
+    } else {
+      sessionBadgeText.innerText = "Active Session";
+      sessionBadgeText.style.background = "#ecfdf5";
+      sessionBadgeText.style.color = "#16a34a";
+      sessionBadgeText.style.borderColor = "#bbf7d0";
+    }
   }
 
   function updateLogoutButton() {
@@ -450,16 +784,27 @@ setTimeout(function(){
       logoutBtn.style.pointerEvents = "auto";
       logoutBtn.style.opacity = "1";
       hintText.innerText = "8 hours completed. You can logout now.";
+    } else if (breakLimitReached) {
+      logoutBtn.style.pointerEvents = "none";
+      logoutBtn.style.opacity = "0.5";
+      hintText.innerText = "Break limit of 1 hour is completed. Break buttons are disabled.";
     } else {
       logoutBtn.style.pointerEvents = "none";
       logoutBtn.style.opacity = "0.5";
-      hintText.innerText = "Logout will be enabled after you complete 8 hours of net working time.";
+      hintText.innerText = "Logout will be enabled after you complete 8 hours of total time.";
     }
   }
 
   function paint() {
+    if (breakSeconds >= BREAK_LIMIT_SECONDS) {
+      breakSeconds = BREAK_LIMIT_SECONDS;
+      breakLimitReached = true;
+      isOnBreak = false;
+    }
+
     workTimer.innerText = formatTime(workSeconds);
     breakTimer.innerText = formatTime(breakSeconds);
+
     updateButtons();
     updateSessionBadge();
     updateLogoutButton();
@@ -467,7 +812,17 @@ setTimeout(function(){
 
   setInterval(() => {
     workSeconds++;
-    if (isOnBreak) breakSeconds++;
+
+    if (isOnBreak && !breakLimitReached) {
+      breakSeconds++;
+
+      if (breakSeconds >= BREAK_LIMIT_SECONDS) {
+        breakSeconds = BREAK_LIMIT_SECONDS;
+        breakLimitReached = true;
+        isOnBreak = false;
+      }
+    }
+
     paint();
   }, 1000);
 
@@ -480,6 +835,11 @@ setTimeout(function(){
   }
 
   startBreakBtn.onclick = async () => {
+    if (breakLimitReached) {
+      alert("Break limit of 1 hour is completed.");
+      return;
+    }
+
     const data = await post("{% url 'start_break' %}");
     if (!data.ok) return alert(data.msg || "Failed to start break");
     isOnBreak = true;
@@ -487,6 +847,11 @@ setTimeout(function(){
   };
 
   endBreakBtn.onclick = async () => {
+    if (breakLimitReached) {
+      alert("Break limit of 1 hour is completed.");
+      return;
+    }
+
     const data = await post("{% url 'end_break' %}");
     if (!data.ok) return alert(data.msg || "Failed to end break");
     isOnBreak = false;
@@ -495,7 +860,7 @@ setTimeout(function(){
 
   logoutBtn.onclick = () => {
     if (workSeconds < TARGET_SECONDS) {
-      alert("You can logout only after completing 8 hours net work.");
+      alert("You can logout only after completing 8 hours total time.");
       return;
     }
 

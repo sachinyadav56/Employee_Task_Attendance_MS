@@ -13,15 +13,18 @@
     :root{
         --bg:#f5f7fb;
         --surface:#ffffff;
+        --surface-soft:#fafbff;
         --border:#e5e7eb;
         --text:#0f172a;
         --muted:#64748b;
         --primary:#4f46e5;
+        --primary-dark:#4338ca;
         --danger:#dc2626;
         --success:#059669;
         --warning:#d97706;
         --info:#2563eb;
         --shadow:0 8px 22px rgba(15,23,42,0.05);
+        --shadow-hover:0 12px 28px rgba(15,23,42,0.08);
         --radius:12px;
     }
 
@@ -32,13 +35,16 @@
     body{
         margin:0;
         font-family:'Inter',sans-serif;
-        background:var(--bg);
+        background:
+            radial-gradient(circle at top left, rgba(79,70,229,0.06), transparent 20%),
+            radial-gradient(circle at bottom right, rgba(37,99,235,0.05), transparent 20%),
+            var(--bg);
         color:var(--text);
         font-size:11px;
     }
 
     .topbar{
-        background:var(--surface);
+        background:rgba(255,255,255,0.92);
         border-bottom:1px solid var(--border);
         padding:12px 18px;
         display:flex;
@@ -46,6 +52,10 @@
         align-items:center;
         gap:12px;
         box-shadow:var(--shadow);
+        position:sticky;
+        top:0;
+        z-index:1000;
+        backdrop-filter:blur(10px);
     }
 
     .brand{
@@ -56,13 +66,13 @@
         font-weight:700;
         color:var(--primary);
         white-space:nowrap;
-        text-decoration:none;   /* remove underline */
+        text-decoration:none;
     }
 
     .brand:hover{
-    text-decoration:none;   /* prevent underline on hover */
-    color:#2563eb;          /* keep same color */
-}
+        text-decoration:none;
+        color:#2563eb;
+    }
 
     .nav-links{
         display:flex;
@@ -83,7 +93,7 @@
         text-decoration:none;
         font-size:11px;
         font-weight:600;
-        transition:0.18s ease;
+        transition:all 0.18s ease;
     }
 
     .nav-link-item:hover{
@@ -96,28 +106,74 @@
         background:var(--primary);
         color:#fff;
         border-color:var(--primary);
-    }
-
-    .logout-link{
-        color:var(--danger);
+        box-shadow:0 6px 16px rgba(79,70,229,0.16);
     }
 
     .page-wrap{
-        max-width:1150px;
+        max-width:1180px;
         margin:0 auto;
-        padding:20px 14px;
+        padding:20px 14px 28px;
+    }
+
+    .page-header{
+        background:rgba(255,255,255,0.88);
+        border:1px solid var(--border);
+        border-radius:16px;
+        box-shadow:var(--shadow);
+        padding:15px 16px;
+        margin-bottom:14px;
+        display:flex;
+        justify-content:space-between;
+        align-items:flex-start;
+        gap:12px;
+        flex-wrap:wrap;
+    }
+
+    .page-head-left{
+        display:flex;
+        align-items:flex-start;
+        gap:12px;
+    }
+
+    .page-icon{
+        width:40px;
+        height:40px;
+        border-radius:12px;
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        background:linear-gradient(135deg, var(--primary), #6366f1);
+        color:#fff;
+        font-size:14px;
+        box-shadow:0 8px 18px rgba(79,70,229,0.18);
+        flex-shrink:0;
     }
 
     .page-title{
         font-size:18px;
         font-weight:700;
-        margin-bottom:3px;
+        margin:0 0 3px;
     }
 
     .subtext{
         font-size:11px;
         color:var(--muted);
-        margin-bottom:14px;
+        margin:0;
+        line-height:1.5;
+    }
+
+    .page-chip{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:6px 10px;
+        background:#eef2ff;
+        border:1px solid #c7d2fe;
+        color:var(--primary);
+        border-radius:999px;
+        font-size:10px;
+        font-weight:700;
+        white-space:nowrap;
     }
 
     .table-card{
@@ -125,14 +181,44 @@
         border:1px solid var(--border);
         border-radius:var(--radius);
         box-shadow:var(--shadow);
-        padding:14px;
+        overflow:hidden;
     }
 
-    .alert{
-        font-size:11px;
-        border-radius:8px;
-        padding:8px 10px;
-        margin-bottom:12px;
+    .table-card-top{
+        padding:13px 16px;
+        border-bottom:1px solid var(--border);
+        background:linear-gradient(180deg, #ffffff 0%, #fafbff 100%);
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:10px;
+        flex-wrap:wrap;
+    }
+
+    .table-card-title{
+        font-size:12px;
+        font-weight:700;
+        margin:0 0 2px;
+        color:var(--text);
+    }
+
+    .table-card-subtitle{
+        font-size:10px;
+        color:var(--muted);
+        margin:0;
+    }
+
+    .table-count{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:6px 10px;
+        border-radius:999px;
+        background:#f8fafc;
+        border:1px solid #e2e8f0;
+        color:#475569;
+        font-size:10px;
+        font-weight:700;
     }
 
     .table{
@@ -146,33 +232,50 @@
         color:var(--muted);
         font-weight:700;
         border-bottom:1px solid var(--border);
-        padding:10px 12px;
+        padding:11px 12px;
         white-space:nowrap;
         background:#fafbfc;
     }
 
     .table tbody td{
         font-size:11px;
-        padding:10px 12px;
+        padding:12px;
         vertical-align:middle;
         border-color:#edf2f7;
+    }
+
+    .table tbody tr{
+        transition:all 0.18s ease;
     }
 
     .table tbody tr:hover{
         background:#fbfdff;
     }
 
+    .emp-badge{
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:5px 8px;
+        border-radius:999px;
+        background:#f8fafc;
+        border:1px solid #e2e8f0;
+        font-weight:700;
+        color:#334155;
+    }
+
     .report-title{
         font-size:11px;
         font-weight:700;
         color:var(--text);
-        margin-bottom:2px;
+        margin-bottom:3px;
+        line-height:1.4;
     }
 
     .report-desc{
         font-size:10px;
         color:var(--muted);
-        line-height:1.45;
+        line-height:1.5;
     }
 
     .pill{
@@ -184,16 +287,30 @@
         font-size:9px;
         font-weight:700;
         white-space:nowrap;
+        border:1px solid transparent;
     }
 
-    .status-open{background:#fef2f2;color:#dc2626;}
-    .status-progress{background:#fff7ed;color:#ea580c;}
-    .status-resolved{background:#ecfdf5;color:#059669;}
-    .status-closed{background:#f1f5f9;color:#475569;}
+    .status-open{background:#fef2f2;color:#dc2626;border-color:#fecaca;}
+    .status-progress{background:#fff7ed;color:#ea580c;border-color:#fed7aa;}
+    .status-resolved{background:#ecfdf5;color:#059669;border-color:#bbf7d0;}
+    .status-closed{background:#f1f5f9;color:#475569;border-color:#e2e8f0;}
 
-    .priority-low{background:#e0f2fe;color:#0284c7;}
-    .priority-medium{background:#fef9c3;color:#a16207;}
-    .priority-high{background:#fee2e2;color:#b91c1c;}
+    .priority-low{background:#e0f2fe;color:#0284c7;border-color:#bae6fd;}
+    .priority-medium{background:#fef9c3;color:#a16207;border-color:#fde68a;}
+    .priority-high{background:#fee2e2;color:#b91c1c;border-color:#fecaca;}
+
+    .date-text{
+        color:#475569;
+        font-weight:600;
+    }
+
+    .update-box{
+        min-width:160px;
+        background:var(--surface-soft);
+        border:1px solid #edf2f7;
+        border-radius:10px;
+        padding:8px;
+    }
 
     .form-select,
     select{
@@ -202,6 +319,7 @@
         font-size:10px !important;
         padding:6px 8px !important;
         box-shadow:none !important;
+        background:#fff !important;
     }
 
     .form-select:focus,
@@ -215,13 +333,75 @@
         font-size:10px;
         font-weight:600;
         padding:6px 10px;
+        background:linear-gradient(135deg, var(--primary), var(--primary-dark));
+        border:none;
+        box-shadow:0 6px 14px rgba(79,70,229,0.14);
+    }
+
+    .btn-update:hover{
+        background:linear-gradient(135deg, var(--primary-dark), #3730a3);
     }
 
     .empty-row{
-        font-size:11px;
-        color:var(--muted);
         text-align:center;
-        padding:18px 0;
+        padding:30px 12px !important;
+    }
+
+    .empty-state{
+        display:flex;
+        flex-direction:column;
+        align-items:center;
+        gap:8px;
+        color:var(--muted);
+    }
+
+    .empty-state i{
+        font-size:24px;
+        color:#94a3b8;
+    }
+
+    .empty-state strong{
+        font-size:11px;
+        color:var(--text);
+    }
+
+    .toast-container{
+        position:fixed;
+        top:25px;
+        right:25px;
+        z-index:9999;
+        display:flex;
+        flex-direction:column;
+        gap:10px;
+    }
+
+    .toast-message{
+        background:#16a34a;
+        color:white;
+        padding:12px 18px;
+        border-radius:10px;
+        font-size:14px;
+        display:flex;
+        align-items:center;
+        gap:10px;
+        min-width:250px;
+        box-shadow:0 8px 20px rgba(0,0,0,0.15);
+        animation:slideIn 0.4s ease;
+    }
+
+    .toast-message.error{
+        background:#dc2626;
+    }
+
+    @keyframes slideIn{
+        from{
+            transform:translateX(100%);
+            opacity:0;
+        }
+        to{
+            transform:translateX(0);
+            opacity:1;
+        }
     }
 
     @media (max-width: 768px){
@@ -237,65 +417,30 @@
         .page-wrap{
             padding:14px 10px;
         }
+
+        .page-header{
+            align-items:flex-start;
+        }
+
+        .toast-container{
+            top:14px;
+            right:14px;
+            left:14px;
+        }
+
+        .toast-message{
+            min-width:auto;
+            width:100%;
+        }
     }
-
-    .toast-container{
-    position: fixed;
-    top: 25px;
-    right: 25px;
-    z-index: 9999;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.toast-message{
-    background: #16a34a;
-    color: white;
-    padding: 12px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 250px;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-    animation: slideIn 0.4s ease;
-}
-
-.toast-message.error{
-    background:#dc2626;
-}
-
-@keyframes slideIn{
-    from{
-        transform: translateX(100%);
-        opacity:0;
-    }
-    to{
-        transform: translateX(0);
-        opacity:1;
-    }
-}
 </style>
 </head>
-<script>
-setTimeout(function(){
-    document.querySelectorAll(".toast-message").forEach(function(msg){
-        msg.style.opacity="0";
-        msg.style.transform="translateX(100%)";
-        setTimeout(()=>msg.remove(),500);
-    });
-},3000);
-</script>
 <body>
 
 <header class="topbar">
-    <div class="brand">
-       <a href="{% url 'management_dashboard' %}" class="brand">
-    <i class="bi bi-kanban-fill"></i> ETAMS Management
-</a>
-    </div>
+    <a href="{% url 'management_dashboard' %}" class="brand">
+        <i class="bi bi-kanban-fill"></i> ETAMS Management
+    </a>
 
     <div class="nav-links">
         <a href="{% url 'add_announcement' %}" class="nav-link-item">
@@ -309,13 +454,10 @@ setTimeout(function(){
         <a href="{% url 'management_it_reports' %}" class="nav-link-item active">
             <i class="bi bi-life-preserver"></i> All Reports
         </a>
-
     </div>
 </header>
 
-<main class="page-wrap">
-
-  {% if messages %}
+{% if messages %}
 <div class="toast-container">
     {% for message in messages %}
     <div class="toast-message {{ message.tags }}">
@@ -326,12 +468,37 @@ setTimeout(function(){
 </div>
 {% endif %}
 
-    <div class="page-title">IT Support Reports</div>
-    <div class="subtext">Review employee IT issues and update their current status.</div>
+<main class="page-wrap">
 
-    
+    <div class="page-header">
+        <div class="page-head-left">
+            <div class="page-icon">
+                <i class="bi bi-life-preserver"></i>
+            </div>
+
+            <div>
+                <div class="page-title">IT Support Reports</div>
+                <p class="subtext">Review employee IT issues and update their current status.</p>
+            </div>
+        </div>
+
+        <div class="page-chip">
+            <i class="bi bi-shield-check"></i> Management Review
+        </div>
+    </div>
 
     <div class="table-card">
+        <div class="table-card-top">
+            <div>
+                <div class="table-card-title">All Submitted Reports</div>
+                <p class="table-card-subtitle">Manage issue priorities, track progress, and update report status.</p>
+            </div>
+
+            <div class="table-count">
+                <i class="bi bi-list-check"></i> {{ reports|length }} Reports
+            </div>
+        </div>
+
         <div class="table-responsive">
             <table class="table align-middle">
                 <thead>
@@ -350,7 +517,10 @@ setTimeout(function(){
                     {% for report in reports %}
                     <tr>
                         <td>
-                            <strong>{{ report.employee.employee_id }}</strong>
+                            <span class="emp-badge">
+                                <i class="bi bi-person-badge"></i>
+                                {{ report.employee.employee_id }}
+                            </span>
                         </td>
 
                         <td>
@@ -382,29 +552,37 @@ setTimeout(function(){
                             {% endif %}
                         </td>
 
-                        <td>{{ report.created_at|date:"d M Y" }}</td>
+                        <td>
+                            <span class="date-text">{{ report.created_at|date:"d M Y" }}</span>
+                        </td>
 
-                        <td style="min-width:150px;">
-                            <form method="POST" action="{% url 'update_it_report_status' report.id %}">
-                                {% csrf_token %}
+                        <td>
+                            <div class="update-box">
+                                <form method="POST" action="{% url 'update_it_report_status' report.id %}">
+                                    {% csrf_token %}
 
-                                <select name="status" class="form-select form-select-sm mb-2">
-                                    <option value="Open" {% if report.status == "Open" %}selected{% endif %}>Open</option>
-                                    <option value="In Progress" {% if report.status == "In Progress" %}selected{% endif %}>In Progress</option>
-                                    <option value="Resolved" {% if report.status == "Resolved" %}selected{% endif %}>Resolved</option>
-                                    <option value="Closed" {% if report.status == "Closed" %}selected{% endif %}>Closed</option>
-                                </select>
+                                    <select name="status" class="form-select form-select-sm mb-2">
+                                        <option value="Open" {% if report.status == "Open" %}selected{% endif %}>Open</option>
+                                        <option value="In Progress" {% if report.status == "In Progress" %}selected{% endif %}>In Progress</option>
+                                        <option value="Resolved" {% if report.status == "Resolved" %}selected{% endif %}>Resolved</option>
+                                        <option value="Closed" {% if report.status == "Closed" %}selected{% endif %}>Closed</option>
+                                    </select>
 
-                                <button class="btn btn-sm btn-primary btn-update w-100">
-                                    Update
-                                </button>
-                            </form>
+                                    <button class="btn btn-sm btn-primary btn-update w-100" type="submit">
+                                        Update
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
                         <td colspan="7" class="empty-row">
-                            No IT reports found
+                            <div class="empty-state">
+                                <i class="bi bi-inbox"></i>
+                                <strong>No IT reports found</strong>
+                                <span>Submitted employee issues will appear here.</span>
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -414,8 +592,15 @@ setTimeout(function(){
     </div>
 
 </main>
-<script>
 
+<script>
+setTimeout(function(){
+    document.querySelectorAll(".toast-message").forEach(function(msg){
+        msg.style.opacity="0";
+        msg.style.transform="translateX(100%)";
+        setTimeout(()=>msg.remove(),500);
+    });
+},3000);
 </script>
 </body>
 </html>

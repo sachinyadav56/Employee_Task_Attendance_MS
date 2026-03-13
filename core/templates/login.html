@@ -1,265 +1,608 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Employee Login | ETAMS</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
 
     <style>
         :root {
-            --primary-color: #2563eb;
-            --primary-hover: #1d4ed8;
-            --bg-color: #f8fafc;
-            --text-main: #1e293b;
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --secondary: #0f172a;
+            --bg-1: #eef4ff;
+            --bg-2: #f8fafc;
+            --card-bg: rgba(255, 255, 255, 0.82);
+            --border: rgba(255, 255, 255, 0.55);
+            --text-main: #0f172a;
             --text-muted: #64748b;
+            --input-bg: rgba(255, 255, 255, 0.78);
+            --shadow-lg: 0 25px 60px rgba(15, 23, 42, 0.16);
+            --shadow-md: 0 12px 28px rgba(15, 23, 42, 0.08);
+            --radius-xl: 24px;
+            --radius-lg: 16px;
+            --radius-md: 12px;
+        }
+
+        * {
+            box-sizing: border-box;
         }
 
         body {
             min-height: 100vh;
-            background-color: var(--bg-color);
-            background-image: radial-gradient(at 0% 0%, rgba(37, 99, 235, 0.05) 0, transparent 50%), 
-                              radial-gradient(at 100% 100%, rgba(37, 99, 235, 0.05) 0, transparent 50%);
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            background:
+                radial-gradient(circle at 15% 20%, rgba(37, 99, 235, 0.18), transparent 25%),
+                radial-gradient(circle at 85% 80%, rgba(59, 130, 246, 0.16), transparent 22%),
+                linear-gradient(135deg, var(--bg-1), var(--bg-2));
             display: flex;
             align-items: center;
             justify-content: center;
-            font-family: 'Inter', sans-serif;
-            padding: 20px;
+            padding: 24px;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        .bg-shape {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(10px);
+            z-index: 0;
+            animation: float 8s ease-in-out infinite;
+        }
+
+        .bg-shape.one {
+            width: 220px;
+            height: 220px;
+            top: 8%;
+            left: 6%;
+            background: rgba(37, 99, 235, 0.12);
+        }
+
+        .bg-shape.two {
+            width: 180px;
+            height: 180px;
+            bottom: 10%;
+            right: 8%;
+            background: rgba(14, 165, 233, 0.12);
+            animation-delay: 1.5s;
+        }
+
+        .bg-shape.three {
+            width: 140px;
+            height: 140px;
+            top: 55%;
+            left: 14%;
+            background: rgba(99, 102, 241, 0.10);
+            animation-delay: 0.8s;
+        }
+
+        .login-wrapper {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1050px;
+        }
+
+        .login-shell {
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            min-height: 650px;
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+            background: rgba(255, 255, 255, 0.45);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.4);
+        }
+
+        .login-left {
+            position: relative;
+            padding: 56px 48px;
+            background:
+                linear-gradient(160deg, rgba(37,99,235,0.95), rgba(30,64,175,0.92)),
+                linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .login-left::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255,255,255,0.18), transparent 28%),
+                radial-gradient(circle at 80% 70%, rgba(255,255,255,0.12), transparent 20%);
+            pointer-events: none;
+        }
+
+        .brand-top,
+        .left-content,
+        .left-footer {
+            position: relative;
+            z-index: 1;
+        }
+
+        .brand-top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .brand-badge {
+            width: 54px;
+            height: 54px;
+            border-radius: 16px;
+            background: rgba(255,255,255,0.18);
+            border: 1px solid rgba(255,255,255,0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+        }
+
+        .brand-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+            margin: 0;
+        }
+
+        .brand-subtitle {
+            font-size: 0.9rem;
+            opacity: 0.85;
+            margin: 2px 0 0;
+        }
+
+        .left-content h1 {
+            font-size: 2.6rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            max-width: 440px;
+        }
+
+        .left-content p {
+            font-size: 1rem;
+            line-height: 1.7;
+            opacity: 0.9;
+            max-width: 470px;
+            margin-bottom: 28px;
+        }
+
+        .feature-list {
+            display: grid;
+            gap: 14px;
+            max-width: 420px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: rgba(255,255,255,0.12);
+            border: 1px solid rgba(255,255,255,0.16);
+        }
+
+        .feature-item i {
+            font-size: 1.1rem;
+        }
+
+        .feature-item span {
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .left-footer {
+            font-size: 0.88rem;
+            opacity: 0.85;
+        }
+
+        .login-right {
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            padding: 42px 38px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .login-card {
             width: 100%;
             max-width: 420px;
-            background: #ffffff;
-            border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-            overflow: hidden;
         }
 
         .login-header {
-            padding: 40px 30px 20px 30px;
-            text-align: center;
+            margin-bottom: 26px;
         }
 
-        .brand-logo {
-            width: 48px;
-            height: 48px;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 10px;
-            display: flex;
+        .mini-badge {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 15px;
-            font-size: 1.5rem;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            gap: 8px;
+            padding: 8px 12px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.08);
+            border: 1px solid rgba(37, 99, 235, 0.12);
+            border-radius: 999px;
+            margin-bottom: 16px;
         }
 
-        .login-header h3 {
+        .login-header h2 {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
             color: var(--text-main);
-            font-weight: 700;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
         }
 
         .login-header p {
+            font-size: 0.96rem;
             color: var(--text-muted);
-            font-size: 0.9rem;
+            margin: 0;
         }
 
-        .login-body {
-            padding: 0 30px 40px 30px;
-        }
-
-        /* Modern Input Styling */
         .form-label {
-            font-size: 0.85rem;
-            font-weight: 500;
+            font-size: 0.88rem;
+            font-weight: 600;
             color: var(--text-main);
-            margin-bottom: 6px;
+            margin-bottom: 8px;
+        }
+
+        .input-group.custom-group {
+            background: var(--input-bg);
+            border: 1px solid #dbe5f1;
+            border-radius: 14px;
+            overflow: hidden;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(15, 23, 42, 0.03);
+        }
+
+        .input-group.custom-group:focus-within {
+            border-color: rgba(37, 99, 235, 0.45);
+            box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.10);
+            transform: translateY(-1px);
         }
 
         .input-group-text {
-            background-color: transparent;
-            border-right: none;
-            color: var(--text-muted);
+            background: transparent;
+            border: none;
+            color: #64748b;
+            padding: 0 14px;
+            font-size: 1rem;
         }
 
-        .form-control, .form-select {
-            border: 1px solid #e2e8f0;
-            padding: 10px 12px;
-            font-size: 0.95rem;
-            transition: all 0.2s;
+        .form-control,
+        .form-select {
+            border: none;
+            background: transparent;
+            padding: 14px 14px 14px 0;
+            font-size: 0.96rem;
+            color: var(--text-main);
+            box-shadow: none !important;
         }
 
-        .form-control:focus, .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.1);
+        .form-select {
+            padding-left: 14px;
+        }
+
+        .form-control::placeholder {
+            color: #94a3b8;
         }
 
         .password-toggle {
             cursor: pointer;
-            border-left: none;
+            user-select: none;
         }
 
-        .btn-login {
-            background-color: var(--primary-color);
-            border: none;
-            padding: 12px;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: background 0.2s;
-            margin-top: 10px;
-        }
-
-        .btn-login:hover {
-            background-color: var(--primary-hover);
+        .password-toggle:hover {
+            color: var(--primary);
         }
 
         .alert {
-            font-size: 0.85rem;
             border: none;
-            background-color: #fef2f2;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            padding: 14px 15px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .alert-danger {
+            background: #fef2f2;
             color: #991b1b;
-            padding: 12px;
-            margin-bottom: 20px;
+        }
+
+        .alert-warning {
+            background: #fff7ed !important;
+            color: #9a3412 !important;
+        }
+
+        .btn-login {
+            width: 100%;
+            border: none;
+            border-radius: 14px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            font-weight: 700;
+            font-size: 0.98rem;
+            padding: 14px;
+            margin-top: 8px;
+            transition: all 0.25s ease;
+            box-shadow: 0 14px 24px rgba(37, 99, 235, 0.22);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 18px 30px rgba(37, 99, 235, 0.26);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
+        }
+
+        .btn-login:disabled {
+            background: #94a3b8;
+            box-shadow: none;
+            cursor: not-allowed;
+        }
+
+        .helper-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 14px;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .secure-note,
+        .footer-note {
+            color: var(--text-muted);
+            font-size: 0.84rem;
         }
 
         .footer-note {
+            margin-top: 22px;
             text-align: center;
-            font-size: 0.8rem;
-            color: var(--text-muted);
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #f1f5f9;
+            padding-top: 18px;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
         }
 
-        /* Animation */
         .fade-in {
-            animation: fadeIn 0.5s ease-in-out;
+            animation: fadeIn 0.7s ease;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-12px);
+            }
+        }
+
+        @media (max-width: 991px) {
+            .login-shell {
+                grid-template-columns: 1fr;
+                max-width: 560px;
+                margin: 0 auto;
+            }
+
+            .login-left {
+                padding: 34px 28px;
+            }
+
+            .left-content h1 {
+                font-size: 2rem;
+                max-width: 100%;
+            }
+
+            .login-right {
+                padding: 32px 24px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            body {
+                padding: 14px;
+            }
+
+            .login-left {
+                padding: 28px 20px;
+            }
+
+            .login-right {
+                padding: 24px 18px;
+            }
+
+            .login-header h2 {
+                font-size: 1.65rem;
+            }
+
+            .left-content h1 {
+                font-size: 1.7rem;
+            }
+
+            .feature-item {
+                padding: 12px 14px;
+            }
         }
     </style>
 </head>
-
 <body>
 
-<div class="login-card fade-in">
-    <div class="login-header">
-        <div class="brand-logo">
-            <i class="bi bi-shield-check"></i>
-        </div>
-        <h3>Welcome back</h3>
-        <p>Enter your details to access ETAMS</p>
-    </div>
+    <div class="bg-shape one"></div>
+    <div class="bg-shape two"></div>
+    <div class="bg-shape three"></div>
 
-    <div class="login-body">
-{% if messages %}
-    {% for message in messages %}
-        {% if 'error' in message.tags %}
-            <div class="alert alert-danger d-flex align-items-center" role="alert">
-                <i class="bi bi-exclamation-circle-fill me-2"></i>
-                {{ message }}
-            </div>
-        {% endif %}
-    {% endfor %}
-{% endif %}
+    <div class="login-wrapper fade-in">
+        <div class="login-shell">
 
+            <!-- Left Panel -->
+            <div class="login-left">
+                <div class="brand-top">
+                    <div class="brand-badge">
+                        <i class="bi bi-shield-check"></i>
+                    </div>
+                    <div>
+                        <p class="brand-name mb-0">ETAMS</p>
+                        <p class="brand-subtitle">Employee Attendance Management</p>
+                    </div>
+                </div>
 
-         {% if is_weekend_off %}
-      <div class="alert alert-warning d-flex align-items-center" role="alert"
-           style="background:#fff7ed; color:#9a3412;">
-          <i class="bi bi-calendar-x-fill me-2"></i>
-          Today is off ({{ today_name }}). Login is disabled.
-      </div>
-    {% endif %}
+                
 
-    {% if is_before_login_time and not is_weekend_off %}
-<div class="alert alert-warning d-flex align-items-center" role="alert"
-     style="background:#fff7ed; color:#9a3412;">
-    <i class="bi bi-clock-fill me-2"></i>
-    Login starts at {{ login_start_time }}.
-</div>
-{% endif %}
+            <!-- Right Panel -->
+            <div class="login-right">
+                <div class="login-card">
 
-        <form method="post" id="loginForm">
-            {% csrf_token %}
+                    <div class="login-header">
+                        <h2>Welcome back</h2>
+                        <p>Enter your details to access your ETAMS account</p>
+                    </div>
 
-            <div class="mb-3">
-                <label class="form-label">Employee ID</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-person"></i></span>
-                    <input type="text" name="employee_id" class="form-control" placeholder="E1001" required>
+                    {% if messages %}
+                        {% for message in messages %}
+                            {% if 'error' in message.tags %}
+                                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                                    <div>{{ message }}</div>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if is_weekend_off %}
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="bi bi-calendar-x-fill me-2"></i>
+                            <div>Today is off ({{ today_name }}). Login is disabled.</div>
+                        </div>
+                    {% endif %}
+
+                    {% if is_before_login_time and not is_weekend_off %}
+                        <div class="alert alert-warning d-flex align-items-center" role="alert">
+                            <i class="bi bi-clock-fill me-2"></i>
+                            <div>Login starts at {{ login_start_time }}.</div>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" id="loginForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label class="form-label">Employee ID</label>
+                            <div class="input-group custom-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-person-badge"></i>
+                                </span>
+                                <input type="text" name="employee_id" class="form-control" placeholder="Enter Employee ID" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Department</label>
+                            <div class="input-group custom-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-diagram-3"></i>
+                                </span>
+                                <select name="department" id="departmentSelect" class="form-select" required>
+                                    <option value="" selected disabled>Select Department</option>
+                                    {% for dept in departments %}
+                                        <option value="{{ dept.id }}">{{ dept.name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Password</label>
+                            <div class="input-group custom-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-lock"></i>
+                                </span>
+                                <input type="password" name="password" id="passwordInput" class="form-control" placeholder="Enter Password" required>
+                                <span class="input-group-text password-toggle" onclick="togglePassword()">
+                                    <i class="bi bi-eye" id="toggleIcon"></i>
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="helper-row">
+                            <div class="secure-note">
+                                <i class="bi bi-shield-lock me-1"></i>
+                                Secure login portal
+                            </div>
+                        </div>
+
+                        <button
+                            type="submit"
+                            class="btn btn-login"
+                            id="submitBtn"
+                            {% if is_weekend_off or is_before_login_time %}disabled{% endif %}
+                        >
+                            {% if is_before_login_time %}
+                                Login starts at 10:00 AM
+                            {% else %}
+                                <i class="bi bi-box-arrow-in-right me-2"></i>Login
+                            {% endif %}
+                        </button>
+                    </form>
+
+                    <div class="footer-note">
+                        <i class="bi bi-info-circle me-1"></i>
+                        Default password is your registered phone number.
+                    </div>
+
                 </div>
             </div>
 
-            <div class="mb-3">
-                <label class="form-label">Department</label>
-                <select name="department" id="departmentSelect" class="form-select" required>
-                    <option value="" selected disabled>Select Department</option>
-                    {% for dept in departments %}
-                        <option value="{{ dept.id }}">{{ dept.name }}</option>
-                    {% endfor %}
-                </select>
-            </div>
-
-            <div class="mb-4">
-                <label class="form-label">Password</label>
-                <div class="input-group">
-                    <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                    <input type="password" name="password" id="passwordInput" class="form-control" placeholder="••••••••" required style="border-right: none;">
-                    <span class="input-group-text password-toggle" onclick="togglePassword()">
-                        <i class="bi bi-eye" id="toggleIcon"></i>
-                    </span>
-                </div>
-            </div>
-
-            <button type="submit" class="btn btn-login btn-primary w-100" id="submitBtn"
-        {% if is_weekend_off or is_before_login_time %}disabled{% endif %}>
-    {% if is_before_login_time %}
-        Login starts at 10:00 AM
-    {% else %}
-        Login
-    {% endif %}
-</button>
-        </form>
-
-        <div class="footer-note">
-            <i class="bi bi-info-circle me-1"></i> 
-            Default password is your registered phone number.
         </div>
     </div>
-</div>
 
-<script>
-    function togglePassword() {
-        const input = document.getElementById('passwordInput');
-        const icon = document.getElementById('toggleIcon');
-        if (input.type === "password") {
-            input.type = "text";
-            icon.classList.replace('bi-eye', 'bi-eye-slash');
-        } else {
-            input.type = "password";
-            icon.classList.replace('bi-eye-slash', 'bi-eye');
+    <script>
+        function togglePassword() {
+            const input = document.getElementById('passwordInput');
+            const icon = document.getElementById('toggleIcon');
+
+            if (input.type === "password") {
+                input.type = "text";
+                icon.classList.replace('bi-eye', 'bi-eye-slash');
+            } else {
+                input.type = "password";
+                icon.classList.replace('bi-eye-slash', 'bi-eye');
+            }
         }
-    }
 
-    document.getElementById('loginForm').addEventListener('submit', function() {
-        const btn = document.getElementById('submitBtn');
-        if (btn.disabled) return;
+        document.getElementById('loginForm').addEventListener('submit', function () {
+            const btn = document.getElementById('submitBtn');
+            if (btn.disabled) return;
 
-        btn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Signing in...';
-        btn.disabled = true;
-    });
-</script>
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Signing in...';
+            btn.disabled = true;
+        });
+    </script>
 
 </body>
 </html>
